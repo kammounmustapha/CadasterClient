@@ -44,13 +44,13 @@ function Header({ ...props }) {
     });
     return name;
   }
-  const { classes, color } = props;
+  const { classes, color, current_user } = props;
   const appBarClasses = classNames({
     [" " + classes[color]]: color
   });
   return (
     <AppBar className={classes.appBar + appBarClasses}>
-      <Toolbar className={classes.container}>
+      <Toolbar className={classes.container} current_user={props.current_user}>
         <div className={classes.flex}>
           {/* Here we create navbar brand, based on route name */}
           <Button color="transparent" href="#" className={classes.title}>

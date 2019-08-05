@@ -38,9 +38,15 @@ import Search from "@material-ui/icons/Search";
 import CustomInput from "components/CustomInput/CustomInput.jsx";
 import Button from "components/CustomButtons/Button.jsx";
 
+import AuthService from "layouts/AuthService";
 import headerLinksStyle from "assets/jss/material-dashboard-react/components/headerLinksStyle.jsx";
+import { createBrowserHistory } from "history";
 
 class AdminNavbarLinks extends React.Component {
+  constructor(props) {
+    super(props);
+    this.authService = new AuthService();
+  }
   state = {
     openNotifcation: false,
     openProfile: false
@@ -61,7 +67,10 @@ class AdminNavbarLinks extends React.Component {
     if (this.anchorProfile.contains(event.target)) {
       return;
     }
+    const history = createBrowserHistory();
+    this.authService.logout();
     this.setState({ openProfile: false });
+    history.replace("/login");
   };
   render() {
     const { classes } = this.props;

@@ -15,6 +15,7 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
+
 import React from "react";
 import PropTypes from "prop-types";
 import { Switch, Route, Redirect } from "react-router-dom";
@@ -36,6 +37,9 @@ import dashboardStyle from "assets/jss/material-dashboard-react/layouts/dashboar
 import image from "assets/img/sidebar-2.jpg";
 import logo from "assets/img/reactlogo.png";
 
+import AuthService from "layouts/AuthService";
+import { createBrowserHistory } from "history";
+
 let ps;
 
 const switchRoutes = (
@@ -47,6 +51,7 @@ const switchRoutes = (
             path={prop.layout + prop.path}
             component={prop.component}
             key={key}
+            
           />
         );
       }
@@ -57,13 +62,20 @@ const switchRoutes = (
 );
 
 class Dashboard extends React.Component {
+  authService = new AuthService();
   state = {
     image: image,
     color: "blue",
     hasImage: true,
     fixedClasses: "dropdown show",
-    mobileOpen: false
+    mobileOpen: false,
+    current_user: this.authService.getProfile()
   };
+  componentWillMount() {
+    if (!this.authService.loggedIn()) {
+      this.props.history.push("/login");
+    }
+  }
   mainPanel = React.createRef();
   handleImageClick = image => {
     this.setState({ image: image });
@@ -115,7 +127,7 @@ class Dashboard extends React.Component {
       <div className={classes.wrapper}>
         <Sidebar
           routes={routes}
-          logoText={"Creative Tim"}
+          logoText={"Cadaster"}
           logo={logo}
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
@@ -127,6 +139,7 @@ class Dashboard extends React.Component {
           <Navbar
             routes={routes}
             handleDrawerToggle={this.handleDrawerToggle}
+            current_user={this.state.current_user}
             {...rest}
           />
           {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
