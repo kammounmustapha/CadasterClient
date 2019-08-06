@@ -1,20 +1,3 @@
-/*!
-
-=========================================================
-* Material Dashboard React - v1.7.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2019 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/material-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import React from "react";
 // nodejs library to set properties for components
 import PropTypes from "prop-types";
@@ -42,7 +25,7 @@ const options = [
   { value: "2", label: "Cadaster Manager" },
   { value: "3", label: "Admin" }
 ];
-class Dashboard extends React.Component {
+class Users extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -86,7 +69,7 @@ class Dashboard extends React.Component {
       .addUser(user)
       .then(res => {
         console.log(res);
-        this.props.history.replace("/dashboard");
+        this.props.history.replace("/users");
       })
       .catch(err => {
         console.log(err);
@@ -144,17 +127,22 @@ class Dashboard extends React.Component {
                           type="text"
                           onChange={this.handleChange}
                           value={this.state.fullName}
+                          style={{ paddingRight: "20px", width: "170px" }}
                         />
                       </GridItem>
-                      <GridItem xs={12} sm={12} md={4}>
+                      <GridItem xs={12} sm={12} md={8}>
                         <TextField
-                          label="Email address"
+                          label="Email"
                           id="email"
                           required
-                          name="email-address"
                           type="text"
                           onChange={this.handleChange}
                           value={this.state.email}
+                          style={{
+                            paddingRight: "40px",
+                            marginLeft: "80px",
+                            width: "170px"
+                          }}
                         />
                       </GridItem>
                     </GridContainer>
@@ -170,10 +158,21 @@ class Dashboard extends React.Component {
                           required
                           onChange={this.handleChange}
                           value={this.state.password}
+                          style={{
+                            paddingRight: "20px",
+                            height: "70px",
+                            width: "170px"
+                          }}
                         />
                       </GridItem>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <label>Role</label>
+                      <GridItem
+                        xs={12}
+                        sm={12}
+                        md={5}
+                        style={{
+                          marginTop: "30px"
+                        }}
+                      >
                         <Select
                           value={role}
                           onChange={this.handleChange2}
@@ -198,8 +197,8 @@ class Dashboard extends React.Component {
   }
 }
 
-Dashboard.propTypes = {
+Users.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(dashboardStyle)(Dashboard);
+export default withStyles(dashboardStyle)(Users);

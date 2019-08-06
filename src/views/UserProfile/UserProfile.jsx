@@ -59,11 +59,13 @@ function UserProfile(props) {
   const { classes, current_user } = props;
   const authService = new AuthService();
   const user = authService.getProfile();
-  const opts = [
-    { label: "Admin", value: 1 },
-    { label: "Cadaster Manager", value: 2 },
-    { label: "License Applier", value: 3 }
+  const options = [
+    { value: "1", label: "Permit Application" },
+    { value: "2", label: "Cadaster Manager" },
+    { value: "3", label: "Admin" },
+    { value: "4", label: "Super Admin" }
   ];
+
   return (
     <div>
       <GridContainer>
