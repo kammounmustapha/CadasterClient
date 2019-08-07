@@ -24,7 +24,7 @@ export default class CompanyService {
   updateCompany(id, updatedCompany) {
     return this.fetch(`${this.domain}/company/${id}`, {
       method: "PUT",
-      body: updatedCompany
+      body: JSON.stringify(updatedCompany)
     }).then(res => {
       return Promise.resolve(res);
     });

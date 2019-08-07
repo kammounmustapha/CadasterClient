@@ -11,7 +11,8 @@ import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
-
+import Fab from "@material-ui/core/Fab";
+import Icon from "@material-ui/core/Icon";
 import Modal from "react-awesome-modal";
 const useStyles = makeStyles(theme => ({
   container: {
@@ -39,7 +40,10 @@ class Companies extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      message: false,
       companylist: [],
+      companylistFinal: [],
+      companyText: "",
       fullName: "",
       type: "",
       registrationNumber: "",
@@ -49,7 +53,18 @@ class Companies extends React.Component {
       website: "",
       email: "",
       phoneNumber: "",
-      visible: false
+      fullNameNew: "",
+      typeNew: "",
+      registrationNumberNew: "",
+      industryNew: "",
+      headquartersNew: "",
+      areaServedNew: "",
+      websiteNew: "",
+      emailNew: "",
+      phoneNumberNew: "",
+      visible: false,
+      visibleEdit: false,
+      companyEditId: ""
     };
     this.companyService = new CompanyService();
   }
@@ -60,12 +75,17 @@ class Companies extends React.Component {
   };
   closeModal = () => {
     this.setState({
-      visible: false
+      visible: false,
+      visibleEditModal: false
     });
   };
+
   componentDidMount() {
     this.companyService.getAll().then(res => {
-      this.setState({ companylist: res.companies });
+      this.setState({
+        companylist: res.companies,
+        companylistFinal: res.companies
+      });
       console.log(res.companies);
     });
   }
@@ -94,6 +114,71 @@ class Companies extends React.Component {
         console.log(err);
       });
   };
+
+  filterCompanies = e => {
+    var updatedList = this.state.companylist;
+    updatedList = updatedList.filter(item => {
+      return (
+        item.fullName
+          .toString()
+          .toLowerCase()
+          .search(e.target.value.toString().toLowerCase()) !== -1
+      );
+    });
+    this.setState({
+      companylistFinal: updatedList
+    });
+    if (updatedList == 0) {
+      this.setState({
+        message: true
+      });
+    } else {
+      this.setState({
+        message: false
+      });
+    }
+  };
+  handleEdit = company => {
+    this.setState({
+      companyEditId: company._id,
+      fullNameNew: company.fullName,
+      typeNew: company.type,
+      registrationNumberNew: company.registrationNumber,
+      industryNew: company.industry,
+      headquartersNew: company.headquarters,
+      areaServedNew: company.areaServed,
+      websiteNew: company.website,
+      emailNew: company.email,
+      phoneNumberNew: company.phoneNumber,
+      visibleEditModal: true
+    });
+  };
+  handleEditSubmit = event => {
+    event.preventDefault();
+    const updatedCompay = {
+      fullName: this.state.fullNameNew,
+      type: this.state.typeNew,
+      registrationNumber: this.state.registrationNumberNew,
+      indudtry: this.state.industryNew,
+      headquarters: this.state.headquartersNew,
+      areaServed: this.state.areaServedNew,
+      website: this.state.websiteNew,
+      email: this.state.emailNew,
+      phoneNumber: this.state.phoneNumberNew
+    };
+    // console.log(updatedCompay);
+    const id = this.state.companyEditId;
+    console.log(id);
+    this.companyService
+      .updateCompany(id, updatedCompay)
+      .then(res => {
+        console.log(res);
+        window.location.reload();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
   render() {
     const { classes } = this.props;
 
@@ -111,6 +196,15 @@ class Companies extends React.Component {
                 </p>
               </CardHeader>
               <CardBody>
+                <TextField
+                  id="search"
+                  label="Search"
+                  type="search"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.filterCompanies}
+                />
+                {this.state.message ? <li>No search results.</li> : ""}
                 <Table
                   tableHeaderColor="primary"
                   tableHead={[
@@ -121,13 +215,20 @@ class Companies extends React.Component {
                     "Web Site",
                     "registration Number"
                   ]}
-                  tableData={this.state.companylist.map(company => [
+                  tableData={this.state.companylistFinal.map(company => [
                     company.fullName,
                     company.headquarters,
                     company.type,
                     company.industry,
                     company.website,
-                    company.registrationNumber
+                    company.registrationNumber,
+                    <Fab
+                      color="secondary"
+                      aria-label="edit"
+                      onClick={this.handleEdit.bind(this, company)}
+                    >
+                      <Icon>edit_icon</Icon>
+                    </Fab>
                   ])}
                 />
               </CardBody>
@@ -257,6 +358,139 @@ class Companies extends React.Component {
                           style={{ marginLeft: "30px" }}
                         >
                           Cancel
+                        </Button>
+                      </GridItem>
+                    </form>
+                  </GridContainer>
+                </CardBody>
+              </Card>
+            </GridItem>
+          </Modal>
+
+          <Modal
+            visible={this.state.visibleEditModal}
+            width="800"
+            height="500"
+            effect="fadeInUp"
+            onClickAway={this.closeModal}
+          >
+            <GridItem xs={18} sm={12} md={12}>
+              <Card>
+                <CardHeader color="primary">
+                  <h4 className={classes.cardTitleWhite}>Edit Company</h4>
+                </CardHeader>
+                <CardBody>
+                  <GridContainer>
+                    <form
+                      className={classes.container}
+                      noValidate
+                      onSubmit={this.handleEditSubmit}
+                    >
+                      <GridItem xs={6} sm={12} md={12}>
+                        <TextField
+                          id="fullNameNew"
+                          label="Name"
+                          className={classes.textField}
+                          value={this.state.fullNameNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                        <TextField
+                          id="typeNew"
+                          label="Type"
+                          className={classes.textField}
+                          value={this.state.typeNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <TextField
+                          id="registrationNumberNew"
+                          label="Registration Number"
+                          className={classes.textField}
+                          value={this.state.registrationNumberNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                        <TextField
+                          id="industryNew"
+                          label="Industry"
+                          className={useStyles.textField}
+                          value={this.state.industryNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <TextField
+                          id="headquartersNew"
+                          label="Headquarters"
+                          className={useStyles.textField}
+                          value={this.state.headquartersNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                        />
+                        <TextField
+                          id="areaServedNew"
+                          label="Served Area"
+                          className={useStyles.textField}
+                          value={this.state.areaservedNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <TextField
+                          id="websiteNew"
+                          label="Web Site"
+                          className={useStyles.textField}
+                          value={this.state.websiteNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                        <TextField
+                          id="emailNew"
+                          label="Email"
+                          className={useStyles.textField}
+                          value={this.state.emailNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                        <TextField
+                          id="phoneNumberNew"
+                          label="Phone Number"
+                          className={useStyles.textField}
+                          value={this.state.phoneNumberNew}
+                          onChange={this.handleChange}
+                          margin="normal"
+                          style={{ paddingRight: "20px", width: "170px" }}
+                        />
+                      </GridItem>
+                      <br></br>
+                      <GridItem xs={12}>
+                        <Button
+                          color="primary"
+                          round
+                          type="submit"
+                          style={{ paddingRight: "20px" }}
+                        >
+                          Apply Changes
+                        </Button>
+                        <Button
+                          color="default"
+                          round
+                          onClick={this.closeModal}
+                          style={{ marginLeft: "30px" }}
+                        >
+                          Discard
                         </Button>
                       </GridItem>
                     </form>
