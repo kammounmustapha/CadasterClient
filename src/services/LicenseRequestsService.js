@@ -1,47 +1,48 @@
 import AuthService from "../layouts/AuthService";
-export default class CompanyService {
+export default class LicenseRequestsService {
   constructor(domain) {
     this.domain = domain || "http://localhost:3000"; // API server domain
     this.fetch = this.fetch.bind(this); // React binding stuff
     this.authService = new AuthService();
   }
 
-  addCompany(company) {
-    return this.fetch(`${this.domain}/company`, {
+  addApplication(licenseApplication) {
+    return this.fetch(`${this.domain}/licenseApplication`, {
       method: "POST",
-      body: JSON.stringify(company)
+      body: JSON.stringify(licenseApplication)
     }).then(res => {
       return Promise.resolve(res);
     });
   }
-  deleteCompany(id) {
-    return this.fetch(`${this.domain}/company/${id}`, {
+  deleteApplication(id) {
+    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
       method: "DELETE"
     }).then(res => {
       return Promise.resolve(res);
     });
   }
-  updateCompany(id, updatedCompany) {
-    return this.fetch(`${this.domain}/company/${id}`, {
+
+  updateApplication(id, updatedApplication) {
+    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
       method: "PUT",
-      body: JSON.stringify(updatedCompany)
+      body: JSON.stringify(updatedApplication)
     }).then(res => {
       return Promise.resolve(res);
+    });
+  }
+  getById(id) {
+    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
+      method: "GET"
+    }).then(res => {
+      return Promise.resolve(res);
+    });
+  }
+  async getAll() {
+    return await this.fetch(`${this.domain}/licenseApplication`, {
+      method: "GET"
     });
   }
 
-  async getById(id) {
-    return await this.fetch(`${this.domain}/company/${id}`, {
-      method: "GET"
-    });
-  }
-  getAll() {
-    return this.fetch(`${this.domain}/company`, {
-      method: "GET"
-    }).then(res => {
-      return Promise.resolve(res);
-    });
-  }
   fetch(url, options) {
     // performs api calls sending the required authentication headers
     const headers = {

@@ -35,7 +35,7 @@ import routes from "routes.js";
 import dashboardStyle from "assets/jss/material-dashboard-react/layouts/dashboardStyle.jsx";
 
 import image from "assets/img/sidebar-2.jpg";
-import logo from "assets/img/reactlogo.png";
+import logo from "assets/img/ArcGIS_logo.png";
 
 import AuthService from "layouts/AuthService";
 import { createBrowserHistory } from "history";

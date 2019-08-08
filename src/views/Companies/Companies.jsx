@@ -139,6 +139,7 @@ class Companies extends React.Component {
     }
   };
   handleEdit = company => {
+    console.log(company.areaServed);
     this.setState({
       companyEditId: company._id,
       fullNameNew: company.fullName,
@@ -159,7 +160,7 @@ class Companies extends React.Component {
       fullName: this.state.fullNameNew,
       type: this.state.typeNew,
       registrationNumber: this.state.registrationNumberNew,
-      indudtry: this.state.industryNew,
+      industry: this.state.industryNew,
       headquarters: this.state.headquartersNew,
       areaServed: this.state.areaServedNew,
       website: this.state.websiteNew,
@@ -216,12 +217,12 @@ class Companies extends React.Component {
                     "registration Number"
                   ]}
                   tableData={this.state.companylistFinal.map(company => [
-                    company.fullName,
-                    company.headquarters,
-                    company.type,
-                    company.industry,
-                    company.website,
-                    company.registrationNumber,
+                    <b>{company.fullName}</b>,
+                    <b>{company.headquarters}</b>,
+                    <b>{company.type}</b>,
+                    <b>{company.industry}</b>,
+                    <b>{company.website}</b>,
+                    <b>{company.registrationNumber}</b>,
                     <Fab
                       color="secondary"
                       aria-label="edit"
@@ -439,7 +440,7 @@ class Companies extends React.Component {
                           id="areaServedNew"
                           label="Served Area"
                           className={useStyles.textField}
-                          value={this.state.areaservedNew}
+                          value={this.state.areaServedNew}
                           onChange={this.handleChange}
                           margin="normal"
                           style={{ paddingRight: "20px", width: "170px" }}

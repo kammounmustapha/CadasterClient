@@ -22,8 +22,7 @@ import LibraryBooks from "@material-ui/icons/LibraryBooks";
 import BubbleChart from "@material-ui/icons/BubbleChart";
 import LocationOn from "@material-ui/icons/LocationOn";
 import Notifications from "@material-ui/icons/Notifications";
-import Unarchive from "@material-ui/icons/Unarchive";
-import Language from "@material-ui/icons/Language";
+import work from "@material-ui/icons/Work";
 import UserIcon from "@material-ui/icons/People";
 import Company from "@material-ui/icons/Store";
 // core components/views for Admin layout
@@ -34,12 +33,12 @@ import Typography from "views/Typography/Typography.jsx";
 import Icons from "views/Icons/Icons.jsx";
 import Maps from "views/Maps/Maps.jsx";
 import NotificationsPage from "views/Notifications/Notifications.jsx";
-import UpgradeToPro from "views/UpgradeToPro/UpgradeToPro.jsx";
 import Companies from "views/Companies/Companies";
 import Users from "views/Users/Users";
+import LicenseRequests from "views/LicenseRequests/LicenseRequests";
+import lincenseApplications from "views/LicenseRequests/LicenseRequestsNew";
+import LicenseRequestsNew from "views/LicenseRequests/LicenseRequestsNew";
 // core components/views for RTL layout
-import RTLPage from "views/RTLPage/RTLPage.jsx";
-import SignIn from "layouts/Signin";
 const dashboardRoutes = [
   {
     path: "/dashboard",
@@ -62,6 +61,20 @@ const dashboardRoutes = [
     icon: Company,
     component: Companies,
     layout: "/admin"
+  },
+  {
+    path: "/lincenseApplications",
+    name: "License Applications",
+    icon: work,
+    component: LicenseRequests,
+    layout: "/admin"
+  },
+  {
+    path: "/lincenseApplicationsNew",
+    layout: "/admin",
+    component: LicenseRequestsNew,
+    icon: work,
+    name: "Apply for a license"
   },
   {
     path: "/user",
@@ -109,22 +122,6 @@ const dashboardRoutes = [
     rtlName: "إخطارات",
     icon: Notifications,
     component: NotificationsPage,
-    layout: "/admin"
-  },
-  {
-    path: "/rtl-page",
-    name: "RTL Support",
-    rtlName: "پشتیبانی از راست به چپ",
-    icon: Language,
-    component: RTLPage,
-    layout: "/rtl"
-  },
-  {
-    path: "/upgrade-to-pro",
-    name: "Upgrade To PRO",
-    rtlName: "التطور للاحترافية",
-    icon: Unarchive,
-    component: UpgradeToPro,
     layout: "/admin"
   }
 ];
