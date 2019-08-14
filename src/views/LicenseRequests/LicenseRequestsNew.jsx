@@ -1,13 +1,15 @@
 import React, { Component } from "react";
 import GridItem from "components/Grid/GridItem.jsx";
 import GridContainer from "components/Grid/GridContainer.jsx";
-import Table from "components/Table/Table.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import LicenseRequestsService from "../../services/LicenseRequestsService";
+import CompanyService from "../../services/CompanyService";
+
 import Button from "components/CustomButtons/Button.jsx";
+import { getLicenseTypes, getCompanies, matchData } from "./data";
 import TextField from "@material-ui/core/TextField";
 import Fab from "@material-ui/core/Fab";
 import Icon from "@material-ui/core/Icon";
@@ -15,6 +17,8 @@ import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardS
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Tabs, Tab, Panel } from "@bumaga/tabs";
 import LeafletDraw from "./LeafletDraw";
+import Autocomplete from "react-autocomplete";
+import IntegrationReactSelect from "./select";
 const useStyles = makeStyles(theme => ({
   container: {
     display: "flex",
@@ -40,8 +44,90 @@ const useStyles = makeStyles(theme => ({
 class LicenseRequestsNew extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      name: "",
+      type: "",
+      parties: "",
+      peggedDate: "07-08-2019",
+      commodityGroups: "",
+      jusrisdiction: "",
+      region: "",
+      district: "",
+      project: "",
+      responsbileOffice: "",
+      comments: "",
+      company: "",
+      value: "",
+      companiesList: [],
+      currentLicenseId: "",
+      geometry: null,
+      surface: "",
+      message: "",
+      notAllowedToDraw: true,
+      notAllowedToAccessDraw: true
+    };
+    this.data = getLicenseTypes();
+    this.companyService = new CompanyService();
+    this.licenseRequestsService = new LicenseRequestsService();
   }
+  componentDidMount() {
+    this.companyService.getAll().then(res => {
+      console.log(res.companies);
+      this.setState({ companiesList: res.companies });
+    });
+  }
+  handleChange = e => {
+    this.setState({ [e.target.id]: e.target.value });
+  };
+  inputChangedHandler = value => {
+    this.setState({ type: value });
+  };
+  inputChangedHandler2 = value => {
+    console.log(value);
+    this.setState({ company: value });
+  };
+  validateForm = () => {
+    if (
+      this.state.name.length !== "" &&
+      this.state.parties.length !== "" &&
+      this.state.commodityGroups.length !== "" &&
+      this.state.jusrisdiction.length !== "" &&
+      this.state.region.length !== "" &&
+      this.state.district.length !== "" &&
+      this.state.project.length !== ""
+    )
+      return false;
+    else return true;
+  };
+  handleSubmit = event => {
+    event.preventDefault();
+    const licenseApplication = {
+      name: this.state.name,
+      type: this.state.type,
+      parties: this.state.parties,
+      peggedDate: this.state.peggedDate,
+      commodityGroups: this.state.commodityGroups,
+      jurisdiction: this.state.jurisdiction,
+      region: this.state.region,
+      district: this.state.district,
+      project: this.state.project,
+      responsibleOffice: this.state.responsibleOffice,
+      comments: this.state.comments,
+      company: this.state.company.object,
+      etat: 0
+    };
+    this.licenseRequestsService
+      .addApplication(licenseApplication)
+      .then(res => {
+        this.setState({
+          currentLicenseId: res.LicenseApplication._id,
+          message: "the information are saved! please complete the map!",
+          notAllowedToAccessDraw: false
+        });
+      })
+      .catch(err => {});
+    console.log(licenseApplication);
+  };
   render() {
     const { classes } = this.props;
     return (
@@ -49,10 +135,12 @@ class LicenseRequestsNew extends Component {
         <div>
           <center>
             <Tab>
-              <Button>Information</Button>
+              <Button color={this.state.etat}>Information</Button>
             </Tab>
             <Tab>
-              <Button>Draw the area</Button>
+              <Button disabled={this.state.notAllowedToAccessDraw}>
+                Draw the area
+              </Button>
             </Tab>
           </center>
         </div>
@@ -63,7 +151,7 @@ class LicenseRequestsNew extends Component {
                 <Card>
                   <CardHeader color="primary">
                     <h4 className={classes.cardTitleWhite}>
-                      Apply for a new license
+                      Information about the Application
                     </h4>
                   </CardHeader>
                   <CardBody>
@@ -73,41 +161,63 @@ class LicenseRequestsNew extends Component {
                         noValidate
                         onSubmit={this.handleSubmit}
                       >
-                        <GridItem xs={6} sm={12} md={12}>
-                          <TextField
-                            id="fullName"
-                            label="Name"
-                            className={classes.textField}
-                            value={this.state.fullName}
-                            onChange={this.handleChange}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
+                        <GridItem xs={12} sm={12} md={12}>
+                          <IntegrationReactSelect
+                            id="company"
+                            value={this.state.company}
+                            data={this.state.companiesList}
+                            message="choose the company"
+                            label="Company"
+                            newVal={this.inputChangedHandler2}
                           />
-                          <TextField
+                          <IntegrationReactSelect
                             id="type"
-                            label="Type"
-                            className={classes.textField}
                             value={this.state.type}
-                            onChange={this.handleChange}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
+                            data={this.data}
+                            message="choose the type of the license"
+                            label="Type"
+                            newVal={this.inputChangedHandler}
                           />
-                        </GridItem>
-                        <GridItem xs={12} sm={12} md={12}>
                           <TextField
-                            id="registrationNumber"
-                            label="Registration Number"
+                            id="name"
+                            label="License Name"
                             className={classes.textField}
-                            value={this.state.registrationNumber}
+                            value={this.state.name}
+                            onChange={this.handleChange}
+                            margin="normal"
+                            style={{ paddingRight: "20px", width: "400px" }}
+                            required
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={12}>
+                          <TextField
+                            required
+                            id="parties"
+                            label="Parties"
+                            className={classes.textField}
+                            value={this.state.parties}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
                           />
                           <TextField
-                            id="industry"
-                            label="Industry"
-                            className={useStyles.textField}
-                            value={this.state.industry}
+                            required
+                            id="peggedDate"
+                            label="Pegged Date"
+                            type="date"
+                            defaultValue="2019-08-10"
+                            className={classes.textField}
+                            value={this.state.peggedDate}
+                            onChange={this.handleChange}
+                            margin="normal"
+                            style={{ paddingRight: "20px", width: "170px" }}
+                          />
+                          <TextField
+                            required
+                            id="commodityGroups"
+                            label="Commodity Groups"
+                            className={classes.textField}
+                            value={this.state.commodityGroups}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
@@ -115,18 +225,31 @@ class LicenseRequestsNew extends Component {
                         </GridItem>
                         <GridItem xs={12} sm={12} md={12}>
                           <TextField
-                            id="headquarters"
-                            label="Headquarters"
-                            className={useStyles.textField}
-                            value={this.state.headquarters}
+                            required
+                            id="jusrisdiction"
+                            label="Jurisdiction"
+                            className={classes.textField}
+                            value={this.state.jusrisdiction}
                             onChange={this.handleChange}
                             margin="normal"
+                            style={{ paddingRight: "20px", width: "170px" }}
                           />
                           <TextField
-                            id="areaServed"
-                            label="Served Area"
-                            className={useStyles.textField}
-                            value={this.state.areaserved}
+                            id="region"
+                            required
+                            label="Region"
+                            className={classes.textField}
+                            value={this.state.region}
+                            onChange={this.handleChange}
+                            margin="normal"
+                            style={{ paddingRight: "20px", width: "170px" }}
+                          />
+                          <TextField
+                            id="district"
+                            required
+                            label="District"
+                            className={classes.textField}
+                            value={this.state.district}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
@@ -134,31 +257,39 @@ class LicenseRequestsNew extends Component {
                         </GridItem>
                         <GridItem xs={12} sm={12} md={12}>
                           <TextField
-                            id="website"
-                            label="Web Site"
-                            className={useStyles.textField}
-                            value={this.state.website}
+                            required
+                            id="project"
+                            label="Project"
+                            className={classes.textField}
+                            value={this.state.project}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
                           />
                           <TextField
-                            id="email"
-                            label="Email"
-                            className={useStyles.textField}
-                            value={this.state.email}
+                            id="responsibleOffice"
+                            required
+                            label="Responsible Office"
+                            className={classes.textField}
+                            value={this.state.responsibleOffice}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
                           />
+                        </GridItem>
+                        <GridItem>
                           <TextField
-                            id="phoneNumber"
-                            label="Phone Number"
-                            className={useStyles.textField}
-                            value={this.state.phoneNumber}
+                            id="comments"
+                            label="Comments"
+                            type="textarea"
+                            className={classes.textField}
+                            value={this.state.comments}
                             onChange={this.handleChange}
                             margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
+                            style={{ paddingRight: "20px", width: "270px" }}
+                            multiline={true}
+                            rows={4}
+                            rowsMax={8}
                           />
                         </GridItem>
                         <br></br>
@@ -167,7 +298,7 @@ class LicenseRequestsNew extends Component {
                             color="primary"
                             round
                             type="submit"
-                            style={{ paddingRight: "20px" }}
+                            style={{ marginLeft: "30px" }}
                           >
                             Save
                           </Button>
@@ -189,12 +320,51 @@ class LicenseRequestsNew extends Component {
         </Panel>
 
         <Panel>
-          <p>Hello</p>
-          <LeafletDraw></LeafletDraw>
+          <p>{this.state.surface}</p>
+          <Button
+            color="primary"
+            disabled={this.state.notAllowedToDraw}
+            onClick={this.submitGeometry}
+          >
+            Submit{" "}
+          </Button>
+          <LeafletDraw
+            onCreate={this.onCreate}
+            onDelete={this.onDelete}
+          ></LeafletDraw>
         </Panel>
       </Tabs>
     );
   }
+  onDelete = e => {
+    this.setState({ notAllowedToDraw: true, surface: "" });
+  };
+  onCreate = (geo, surface) => {
+    this.setState({
+      geometry: geo[0],
+      surface: (surface / 100).toFixed(2) + " He",
+      notAllowedToDraw: false
+    });
+    console.log(surface);
+  };
+  submitGeometry = e => {
+    e.preventDefault();
+    const g = {
+      geometry: {
+        type: "Polygon",
+        coordinates: [this.state.geometry]
+      }
+    };
+    this.licenseRequestsService
+      .updateApplication(this.state.currentLicenseId, g)
+      .then(res => {
+        console.log("succeess");
+        this.props.history.replace("/admin/lincenseApplications");
+      })
+      .catch(err => {
+        console.log("err");
+      });
+  };
 }
 
 export default withStyles(dashboardStyle)(LicenseRequestsNew);

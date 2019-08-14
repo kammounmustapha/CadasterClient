@@ -2,10 +2,23 @@ import React, { Component } from "react";
 import { Map, TileLayer, FeatureGroup, Circle } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import L from "leaflet";
+import Button from "../../components/CustomButtons/Button";
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-icon.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-shadow.png"
+});
+
+//
+
+let polyline;
 class LeafletDraw extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
   }
 
   _onEdited = e => {
@@ -21,73 +34,77 @@ class LeafletDraw extends Component {
   _onCreated = e => {
     let type = e.layerType;
     let layer = e.layer;
-    console.log(layer._latlngs);
+    const surface = L.GeometryUtil.geodesicArea(layer._latlngs[0]);
 
+    this.props.onCreate(layer._latlngs, surface);
     this._onChange();
   };
 
   _onDeleted = e => {
-    let numDeleted = 0;
+    /*  let numDeleted = 0;
     e.layers.eachLayer(layer => {
       numDeleted += 1;
     });
     console.log(`onDeleted: removed ${numDeleted} layers`, e);
-
+*/
+    this.props.onDelete();
     this._onChange();
   };
 
   _onMounted = drawControl => {
-    console.log("_onMounted", drawControl);
+    //console.log("_onMounted", drawControl);
   };
 
   _onEditStart = e => {
-    console.log("_onEditStart", e);
+    //console.log("_onEditStart", e);
   };
 
   _onEditStop = e => {
-    console.log("_onEditStop", e);
+    // console.log("_onEditStop", e);
   };
 
   _onDeleteStart = e => {
-    console.log("_onDeleteStart", e);
+    // console.log("_onDeleteStart", e);
   };
 
   _onDeleteStop = e => {
-    console.log("_onDeleteStop", e);
+    // console.log("_onDeleteStop", e);
   };
   render() {
     return (
-      <Map center={[37.8189, -122.4786]} zoom={13} zoomControl={false}>
-        <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
-        />
-        <FeatureGroup
-          ref={reactFGref => {
-            this._onFeatureGroupReady(reactFGref);
-          }}
-        >
-          <EditControl
-            position="topright"
-            onEdited={this._onEdited}
-            onCreated={this._onCreated}
-            onDeleted={this._onDeleted}
-            onMounted={this._onMounted}
-            onEditStart={this._onEditStart}
-            onEditStop={this._onEditStop}
-            onDeleteStart={this._onDeleteStart}
-            onDeleteStop={this._onDeleteStop}
-            draw={{
-              rectangle: false,
-              marker: false,
-              square: false,
-              polyline: false,
-              circlemarker: false,
-              circle: false
-            }}
+      <div>
+        <Map center={[37.8189, -122.4786]} zoom={13} zoomControl={false}>
+          <TileLayer
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
           />
-        </FeatureGroup>
-      </Map>
+          <FeatureGroup
+          /*   ref={reactFGref => {
+            this._onFeatureGroupReady(reactFGref);
+          }}  */
+          >
+            <EditControl
+              position="topright"
+              onEdited={this._onEdited}
+              onCreated={this._onCreated}
+              onDeleted={this._onDeleted}
+              onMounted={this._onMounted}
+              onEditStart={this._onEditStart}
+              onEditStop={this._onEditStop}
+              onDeleteStart={this._onDeleteStart}
+              onDeleteStop={this._onDeleteStop}
+              draw={{
+                rectangle: false,
+                marker: false,
+                square: false,
+                polyline: false,
+                circlemarker: false,
+                circle: false
+              }}
+            />
+          </FeatureGroup>
+        </Map>
+      </div>
     );
   }
   _editableFG = null;

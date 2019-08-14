@@ -10,8 +10,12 @@ import LicenseRequestsService from "../../services/LicenseRequestsService";
 import Button from "components/CustomButtons/Button.jsx";
 import Fab from "@material-ui/core/Fab";
 import Icon from "@material-ui/core/Icon";
+import TextField from "@material-ui/core/TextField";
 
 import { Redirect } from "react-router-dom";
+import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle";
+import { withStyles } from "@material-ui/styles";
+
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -39,10 +43,33 @@ class LicenseRequests extends React.Component {
       messageText: "",
       applicationsList: [],
       applicationsListFinal: [],
-      redirect: false
+      message: ""
     };
     this.licenseRequestsService = new LicenseRequestsService();
   }
+  filterApplications = e => {
+    var updatedList = this.state.applicationsList;
+    updatedList = updatedList.filter(item => {
+      return (
+        item.properties.name
+          .toString()
+          .toLowerCase()
+          .search(e.target.value.toString().toLowerCase()) !== -1
+      );
+    });
+    this.setState({
+      applicationsListFinal: updatedList
+    });
+    if (updatedList == 0) {
+      this.setState({
+        message: true
+      });
+    } else {
+      this.setState({
+        message: false
+      });
+    }
+  };
   componentDidMount = () => {
     this.licenseRequestsService.getAll().then(res => {
       this.setState({
@@ -52,15 +79,12 @@ class LicenseRequests extends React.Component {
     });
   };
   handleNewButton = () => {
-    console.log("sss");
-    this.setState({ redirect: true });
+    this.props.history.push("/admin/lincenseApplicationsNew");
   };
+  handleEdit = () => {};
   render() {
     const { classes } = this.props;
-    const { redirect } = this.state;
-    if (redirect) {
-      this.props.history.push("/admin/lincenseApplicationsNew");
-    }
+
     return (
       <div>
         <GridContainer>
@@ -77,6 +101,15 @@ class LicenseRequests extends React.Component {
                 </p>
               </CardHeader>
               <CardBody>
+                <TextField
+                  id="search"
+                  label="Search"
+                  type="search"
+                  className={classes.textField}
+                  margin="normal"
+                  onChange={this.filterApplications}
+                />
+                {this.state.message ? <li>No search results.</li> : ""}
                 <Table
                   tableHeaderColor="primary"
                   tableHead={[
@@ -95,12 +128,24 @@ class LicenseRequests extends React.Component {
                       return [
                         <b>{properties.name}</b>,
                         <b>{properties.parties}</b>,
-                        <b>{properties.type}</b>,
+                        <b>
+                          {properties.type.label +
+                            "(" +
+                            properties.type.value +
+                            ")"}
+                        </b>,
                         <b>{properties.peggedDate}</b>,
                         <b>{properties.region}</b>,
                         <b>{properties.project}</b>,
                         <b>{properties.company.fullName}</b>,
-                        <b>{properties.responsibleOffice}</b>
+                        <b>{properties.responsibleOffice}</b>,
+                        <Fab
+                          color="secondary"
+                          aria-label="edit"
+                          onClick={this.handleEdit.bind(this, application)}
+                        >
+                          <Icon>edit_icon</Icon>
+                        </Fab>
                       ];
                     }
                   )}
@@ -124,4 +169,4 @@ class LicenseRequests extends React.Component {
   }
 }
 
-export default LicenseRequests;
+export default withStyles(dashboardStyle)(LicenseRequests);

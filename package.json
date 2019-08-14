@@ -17,6 +17,7 @@
     "perfect-scrollbar": "1.4.0",
     "prop-types": "15.7.2",
     "react": "16.8.6",
+    "react-autocomplete": "^1.8.1",
     "react-awesome-modal": "^2.0.5",
     "react-chartist": "0.13.3",
     "react-dom": "16.8.6",

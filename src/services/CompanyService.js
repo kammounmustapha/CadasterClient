@@ -36,11 +36,11 @@ export default class CompanyService {
     });
   }
   getAll() {
-    return this.fetch(`${this.domain}/company`, {
-      method: "GET"
-    }).then(res => {
-      return Promise.resolve(res);
-    });
+    try {
+      return this.fetch(`${this.domain}/company`, {
+        method: "GET"
+      });
+    } catch (err) {}
   }
   fetch(url, options) {
     // performs api calls sending the required authentication headers
