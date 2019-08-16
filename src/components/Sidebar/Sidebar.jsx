@@ -43,7 +43,10 @@ const Sidebar = ({ ...props }) => {
   var links = (
     <List className={classes.list}>
       {routes.map((prop, key) => {
-        if (prop.path !== "/lincenseApplicationsNew") {
+        if (
+          prop.path !== "/lincenseApplicationsNew" &&
+          prop.path !== "/LicenseApplicationsEdit"
+        ) {
           var activePro = " ";
           var listItemClasses;
           if (prop.path === "/'lincenseApplicationsNew'") {

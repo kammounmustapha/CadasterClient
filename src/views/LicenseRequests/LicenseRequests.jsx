@@ -81,7 +81,10 @@ class LicenseRequests extends React.Component {
   handleNewButton = () => {
     this.props.history.push("/admin/lincenseApplicationsNew");
   };
-  handleEdit = () => {};
+  handleEdit = application => {
+    localStorage.setItem("currentLicenceApplication", application._id);
+    this.props.history.push("/admin/LicenseApplicationsEdit");
+  };
   render() {
     const { classes } = this.props;
 

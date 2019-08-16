@@ -30,8 +30,8 @@ export default class LicenseRequestsService {
       return Promise.resolve(res);
     });
   }
-  getById(id) {
-    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
+  async getById(id) {
+    return await this.fetch(`${this.domain}/licenseApplication/${id}`, {
       method: "GET"
     }).then(res => {
       return Promise.resolve(res);

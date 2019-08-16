@@ -7,17 +7,13 @@ import CardBody from "components/Card/CardBody.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import LicenseRequestsService from "../../services/LicenseRequestsService";
 import CompanyService from "../../services/CompanyService";
-
 import Button from "components/CustomButtons/Button.jsx";
 import { getLicenseTypes, getCompanies, matchData } from "./data";
 import TextField from "@material-ui/core/TextField";
-import Fab from "@material-ui/core/Fab";
-import Icon from "@material-ui/core/Icon";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Tabs, Tab, Panel } from "@bumaga/tabs";
 import LeafletDraw from "./LeafletDraw";
-import Autocomplete from "react-autocomplete";
 import IntegrationReactSelect from "./select";
 const useStyles = makeStyles(theme => ({
   container: {
@@ -50,7 +46,7 @@ class LicenseRequestsNew extends Component {
       parties: "",
       peggedDate: "07-08-2019",
       commodityGroups: "",
-      jusrisdiction: "",
+      jurisdiction: "",
       region: "",
       district: "",
       project: "",
@@ -72,7 +68,6 @@ class LicenseRequestsNew extends Component {
   }
   componentDidMount() {
     this.companyService.getAll().then(res => {
-      console.log(res.companies);
       this.setState({ companiesList: res.companies });
     });
   }
@@ -226,10 +221,10 @@ class LicenseRequestsNew extends Component {
                         <GridItem xs={12} sm={12} md={12}>
                           <TextField
                             required
-                            id="jusrisdiction"
-                            label="Jurisdiction"
+                            id="jurisdiction"
+                            label="jurisdiction"
                             className={classes.textField}
-                            value={this.state.jusrisdiction}
+                            value={this.state.jurisdiction}
                             onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
@@ -320,7 +315,12 @@ class LicenseRequestsNew extends Component {
         </Panel>
 
         <Panel>
-          <p>{this.state.surface}</p>
+          <TextField
+            value={this.state.surface}
+            label="Surface"
+            disabled="true"
+            style={{ width: "100px" }}
+          ></TextField>
           <Button
             color="primary"
             disabled={this.state.notAllowedToDraw}
@@ -350,6 +350,7 @@ class LicenseRequestsNew extends Component {
   submitGeometry = e => {
     e.preventDefault();
     const g = {
+      "properties.surface": this.state.surface,
       geometry: {
         type: "Polygon",
         coordinates: [this.state.geometry]

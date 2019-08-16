@@ -36,7 +36,7 @@ import NotificationsPage from "views/Notifications/Notifications.jsx";
 import Companies from "views/Companies/Companies";
 import Users from "views/Users/Users";
 import LicenseRequests from "views/LicenseRequests/LicenseRequests";
-import lincenseApplications from "views/LicenseRequests/LicenseRequestsNew";
+import LicenseRequestsEdit from "views/LicenseRequests/LicenseRequestsEdit";
 import LicenseRequestsNew from "views/LicenseRequests/LicenseRequestsNew";
 // core components/views for RTL layout
 const dashboardRoutes = [
@@ -75,6 +75,13 @@ const dashboardRoutes = [
     component: LicenseRequestsNew,
     icon: work,
     name: "Apply for a license"
+  },
+  {
+    path: "/LicenseApplicationsEdit",
+    layout: "/admin",
+    component: LicenseRequestsEdit,
+    icon: work,
+    name: "Edit License Application"
   },
   {
     path: "/user",

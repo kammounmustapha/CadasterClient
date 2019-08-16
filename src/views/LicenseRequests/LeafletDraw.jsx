@@ -1,19 +1,7 @@
 import React, { Component } from "react";
-import { Map, TileLayer, FeatureGroup, Circle } from "react-leaflet";
+import { Map, TileLayer, FeatureGroup, GeoJSON } from "react-leaflet";
 import { EditControl } from "react-leaflet-draw";
 import L from "leaflet";
-import Button from "../../components/CustomButtons/Button";
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-icon.png",
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0/images/marker-shadow.png"
-});
-
-//
 
 let polyline;
 class LeafletDraw extends Component {
@@ -34,9 +22,16 @@ class LeafletDraw extends Component {
   _onCreated = e => {
     let type = e.layerType;
     let layer = e.layer;
+    var array = [];
+    layer._latlngs[0].map(element => {
+      array.push([element.lng, element.lat]);
+    });
+    array.push([layer._latlngs[0][0].lng, layer._latlngs[0][0].lat]);
+    var final = array;
+    console.log(JSON.stringify([final]));
     const surface = L.GeometryUtil.geodesicArea(layer._latlngs[0]);
 
-    this.props.onCreate(layer._latlngs, surface);
+    this.props.onCreate([final], surface);
     this._onChange();
   };
 
@@ -53,6 +48,7 @@ class LeafletDraw extends Component {
 
   _onMounted = drawControl => {
     //console.log("_onMounted", drawControl);
+    console.log(this.props.currentApplication);
   };
 
   _onEditStart = e => {
@@ -71,18 +67,20 @@ class LeafletDraw extends Component {
     // console.log("_onDeleteStop", e);
   };
   render() {
+    console.log();
     return (
       <div>
-        <Map center={[37.8189, -122.4786]} zoom={13} zoomControl={false}>
+        <Map
+          style={{ height: "600px", width: "900px" }}
+          center={[2.2, 1.3]}
+          zoom={4}
+          zoomControl={false}
+        >
           <TileLayer
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+            url="https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png"
           />
-          <FeatureGroup
-          /*   ref={reactFGref => {
-            this._onFeatureGroupReady(reactFGref);
-          }}  */
-          >
+          <FeatureGroup>
             <EditControl
               position="topright"
               onEdited={this._onEdited}
@@ -102,41 +100,15 @@ class LeafletDraw extends Component {
                 circle: false
               }}
             />
+            <GeoJSON
+              data={this.props.currentApplication}
+              style={{ fillColor: "#fb6464", opacity: 0 }}
+            />
           </FeatureGroup>
         </Map>
       </div>
     );
   }
-  _editableFG = null;
-  _onFeatureGroupReady = reactFGref => {
-    // populate the leaflet FeatureGroup with the geoJson layers
-    let geodata = {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "LineString",
-            coordinates: [
-              [-122.47979164123535, 37.830124319877235],
-              [-122.47721672058105, 37.809377088502615]
-            ]
-          }
-        }
-      ]
-    };
-    let leafletGeoJSON = new L.GeoJSON(geodata);
-    let leafletFG = reactFGref.leafletElement;
-
-    leafletGeoJSON.eachLayer(layer => {
-      leafletFG.addLayer(layer);
-    });
-
-    // store the ref for future access to content
-
-    this._editableFG = reactFGref;
-  };
 
   _onChange = () => {
     // this._editableFG contains the edited geometry, which can be manipulated through the leaflet API

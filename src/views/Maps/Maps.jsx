@@ -16,8 +16,15 @@
 
 */
 import React from "react";
-import { Map as LeafletMap, TileLayer, Marker, Popup } from "react-leaflet";
-function Maps() {
+import {
+  Map as LeafletMap,
+  TileLayer,
+  Marker,
+  Popup,
+  GeoJSON
+} from "react-leaflet";
+
+function Maps(props) {
   return (
     <LeafletMap
       center={[50, 10]}
@@ -31,10 +38,11 @@ function Maps() {
       animate={true}
       easeLinearity={0.35}
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <Marker position={[50, 10]}>
-        <Popup>Popup for any custom information.</Popup>
-      </Marker>
+      <TileLayer
+        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        url="https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png"
+      />
+      <GeoJSON data={props.data}></GeoJSON>
     </LeafletMap>
   );
 }

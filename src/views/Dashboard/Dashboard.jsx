@@ -18,6 +18,7 @@ import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 import AuthService from "../../layouts/AuthService";
+import LicenseRequestsService from "../../services/LicenseRequestsService";
 import Maps from "../Maps/Maps";
 class Dashboard extends React.Component {
   constructor(props) {
@@ -26,17 +27,25 @@ class Dashboard extends React.Component {
       value: 0
     };
     this.authService = new AuthService();
+    this.licenseRequestsService = new LicenseRequestsService();
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.licenseRequestsService.getAll().then(res => {
+      this.setState({ licenseApplications: res.docs }, () => {
+        console.log(this.state.licenseApplications);
+        this.setState({
+          mapComponent: <Maps data={this.state.licenseApplications} />
+        });
+      });
+    });
+  }
 
   render() {
     const { classes } = this.props;
     return (
       <div>
-        <GridContainer>
-          <Maps></Maps>
-        </GridContainer>
+        <GridContainer>{this.state.mapComponent}</GridContainer>
       </div>
     );
   }
