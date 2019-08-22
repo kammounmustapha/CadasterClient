@@ -71,6 +71,11 @@ class AdminNavbarLinks extends React.Component {
     this.authService.logout();
     this.setState({ openProfile: false });
     history.replace("/login");
+    window.location.reload();
+  };
+  handleOpenProfile = event => {
+    const history = createBrowserHistory();
+    history.replace("/admin/user");
   };
   render() {
     const { classes } = this.props;
@@ -228,13 +233,13 @@ class AdminNavbarLinks extends React.Component {
                   <ClickAwayListener onClickAway={this.handleCloseProfile}>
                     <MenuList role="menu">
                       <MenuItem
-                        onClick={this.handleCloseProfile}
+                        //  onClick={this.handleCloseProfile}
                         className={classes.dropdownItem}
                       >
                         Profile
                       </MenuItem>
                       <MenuItem
-                        onClick={this.handleCloseProfile}
+                        onClick={this.handleOpenProfile}
                         className={classes.dropdownItem}
                       >
                         Settings

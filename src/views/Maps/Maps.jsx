@@ -42,9 +42,14 @@ function Maps(props) {
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png"
       />
-      <GeoJSON data={props.data}></GeoJSON>
+      <GeoJSON data={props.data} onEachFeature={onEachFeature}></GeoJSON>
     </LeafletMap>
   );
+}
+function onEachFeature(feature, layer) {
+  if (feature.properties && feature.properties.name) {
+    layer.bindPopup(feature.properties.name);
+  }
 }
 
 export default Maps;

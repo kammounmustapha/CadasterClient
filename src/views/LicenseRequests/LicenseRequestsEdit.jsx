@@ -10,6 +10,10 @@ import CardBody from "components/Card/CardBody.jsx";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle";
 import LicenseRequestsService from "services/LicenseRequestsService";
 import LeafletDraw from "./LeafletDraw";
+import IntegrationReactSelect from "./select";
+import SelectMultiple from "./selectMultiple";
+import { getCountries, getLicenseTypes, getCommodities } from "./data";
+import CompanyService from "services/CompanyService";
 class LicenseRequestsEdit extends Component {
   constructor(props) {
     super(props);
@@ -20,7 +24,7 @@ class LicenseRequestsEdit extends Component {
       parties: "",
       peggedDate: "07-08-2019",
       commodityGroups: "",
-      jusrisdiction: "",
+      jurisdiction: "",
       region: "",
       district: "",
       project: "",
@@ -28,9 +32,12 @@ class LicenseRequestsEdit extends Component {
       comments: "",
       company: "",
       notAllowedToDraw: true,
-      center: []
+      nbDraw: 0,
+      companiesList: [],
+      MS: ""
     };
     this.applicationService = new LicenseRequestsService();
+    this.companyService = new CompanyService();
   }
   componentDidMount() {
     this.applicationService
@@ -40,7 +47,8 @@ class LicenseRequestsEdit extends Component {
           const { properties } = this.state.currentLicenceApplication;
           this.setState({
             company: properties.company.fullName,
-            type: properties.type.label + " (" + properties.type.value + ")",
+            type:
+              properties.type.label /*+ " (" + properties.type.value + ")" */,
             name: properties.name,
             parties: properties.parties,
             peggedDate: properties.peggedDate,
@@ -55,10 +63,21 @@ class LicenseRequestsEdit extends Component {
           });
         });
       });
-
-    /* const { properties } = this.state.currentLicenceApplication;
-    console.log(this.state.currentLicenceApplication);
-    */
+    this.companyService.getAll().then(res => {
+      this.setState({ companiesList: res.companies }, () => {
+        var MS = (
+          <SelectMultiple
+            id="company"
+            value={this.getText()}
+            data={this.state.companiesList}
+            message="choose the company"
+            label="Company"
+            newVal={this.inputChangedHandler2}
+          />
+        );
+        this.setState({ MS: MS });
+      });
+    });
   }
   handleChange = e => {
     this.setState({ [e.target.id]: e.target.value });
@@ -95,6 +114,46 @@ class LicenseRequestsEdit extends Component {
         console.log("err " + err);
       });
   };
+  inputChangedHandler3 = value => {
+    this.setState({ jurisdiction: value.label });
+  };
+  inputChangedHandler4 = value => {
+    this.setState({ type: value });
+  };
+  inputChangedHandler1 = value => {
+    this.setState({ commodityGroups: value });
+  };
+  inputChangedHandler2 = value => {
+    console.log(value);
+    var array = [];
+    value.map(element => {
+      array.push(element.object);
+    });
+
+    this.setState({ company: array, parties: array });
+  };
+  renderPartiesMS() {
+    return (
+      <SelectMultiple
+        id="company"
+        value={this.getText()}
+        data={this.state.companiesList}
+        message="choose the company"
+        label="Company"
+        newVal={this.inputChangedHandler2}
+      />
+    );
+  }
+  getText() {
+    var array = [];
+    array = this.state.parties.map(suggestion => ({
+      value: suggestion.fullName,
+      label: suggestion.fullName,
+      object: suggestion
+    }));
+
+    return array;
+  }
   render() {
     const { classes } = this.props;
     console.log(this.state.center);
@@ -127,24 +186,14 @@ class LicenseRequestsEdit extends Component {
                       onSubmit={this.handleSubmitInfos}
                     >
                       <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          id="company"
-                          label="Company Name"
-                          className={classes.textField}
-                          value={this.state.company}
-                          margin="normal"
-                          style={{ paddingRight: "20px", width: "400px" }}
-                          disabled="true"
-                        />
-                        <TextField
+                        {this.state.MS}
+                        <IntegrationReactSelect
                           id="type"
-                          label="License Type"
-                          className={classes.textField}
                           value={this.state.type}
-                          onChange={this.handleChange}
-                          margin="normal"
-                          style={{ paddingRight: "20px", width: "400px" }}
-                          disabled="true"
+                          data={getLicenseTypes()}
+                          message="Choose the type"
+                          label="Type"
+                          newVal={this.inputChangedHandler4}
                         />
                       </GridItem>
                       <GridItem xs={12} sm={12} md={12}>
@@ -157,16 +206,6 @@ class LicenseRequestsEdit extends Component {
                           margin="normal"
                           style={{ paddingRight: "20px", width: "280px" }}
                           required
-                        />
-                        <TextField
-                          required
-                          id="parties"
-                          label="Parties"
-                          className={classes.textField}
-                          value={this.state.parties}
-                          onChange={this.handleChange}
-                          margin="normal"
-                          style={{ paddingRight: "20px", width: "280px" }}
                         />
                       </GridItem>
                       <GridItem>
@@ -182,28 +221,26 @@ class LicenseRequestsEdit extends Component {
                           margin="normal"
                           style={{ paddingRight: "20px", width: "280px" }}
                         />
-                        <TextField
-                          required
+                        <SelectMultiple
                           id="commodityGroups"
-                          label="Commodity Groups"
-                          className={classes.textField}
                           value={this.state.commodityGroups}
-                          onChange={this.handleChange}
-                          margin="normal"
-                          style={{ paddingRight: "20px", width: "280px" }}
+                          data={getCommodities()}
+                          message="Choose the commodity groups"
+                          label="Commodity Groups"
+                          value={this.state.commodityGroups}
+                          newVal={this.inputChangedHandler1}
                         />
                       </GridItem>
                       <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          required
+                        <IntegrationReactSelect
                           id="jurisdiction"
-                          label="Jurisdiction"
-                          className={classes.textField}
                           value={this.state.jurisdiction}
-                          onChange={this.handleChange}
-                          margin="normal"
-                          style={{ paddingRight: "20px", width: "280px" }}
+                          data={getCountries()}
+                          message="choose the jurisdiction country"
+                          label="Jurisdiction"
+                          newVal={this.inputChangedHandler3}
                         />
+
                         <TextField
                           id="region"
                           required
@@ -308,7 +345,9 @@ class LicenseRequestsEdit extends Component {
                     <LeafletDraw
                       onCreate={this.onCreate}
                       onDelete={this.onDelete}
+                      onEdit={this.onEdit}
                       currentApplication={this.state.currentLicenceApplication}
+                      type="edit"
                     ></LeafletDraw>
                   </GridContainer>
                 </CardBody>
@@ -320,15 +359,35 @@ class LicenseRequestsEdit extends Component {
     );
   }
   onDelete = e => {
-    this.setState({ notAllowedToDraw: true, surface: "" });
+    if (this.state.nbDraw > 1) {
+      this.setState({ nbDraw: this.state.nbDraw - 1 });
+    } else {
+      this.setState({
+        bDraw: this.state.nbDraw - 1,
+        notAllowedToDraw: true,
+        surface: ""
+      });
+    }
   };
   onCreate = (geo, surface) => {
     this.setState({
       geometry: geo,
-      surface: (surface / 100).toFixed(2) + " He",
+      nbDraw: this.state.nbDraw + 1,
+      surface: (surface / 100).toFixed(2) + " Ha",
       notAllowedToDraw: false
     });
-    console.log(surface);
+    if (this.state.nbDraw > 1) {
+      this.setState({
+        notAllowedToDraw: true
+      });
+    }
+  };
+  onEdit = (geo, surface) => {
+    this.setState({
+      geometry: geo,
+      surface: (surface / 100).toFixed(2) + " Ha",
+      notAllowedToDraw: false
+    });
   };
   submitGeometry = e => {
     e.preventDefault();

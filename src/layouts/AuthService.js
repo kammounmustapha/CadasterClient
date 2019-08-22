@@ -8,15 +8,10 @@ export default class AuthService {
     this.getProfile = this.getProfile.bind(this);
   }
   getUserProfile() {
-    const current_user = localStorage.getItem("user");
-    return this.fetch("${this.domain}/users/userProfile", {
-      method: "GET"
-    }).then(res => {
-      return Promise.resolve(res);
-    });
+    const current_user = JSON.parse(localStorage.getItem("user"));
+    return current_user;
   }
   getUsersList() {
-    const current_user = localStorage.getItem("user");
     return this.fetch("${this.domain}/users/usersList", {
       method: "GET"
     }).then(res => {
@@ -56,7 +51,7 @@ export default class AuthService {
       })
     }).then(res => {
       this.setToken(res.token); // Setting the token in localStorage
-      localStorage.setItem("user", res.user);
+      localStorage.setItem("user", JSON.stringify(res.user));
 
       return Promise.resolve(res);
     });

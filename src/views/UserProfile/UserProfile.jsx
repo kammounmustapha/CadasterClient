@@ -65,7 +65,10 @@ function UserProfile(props) {
     { value: "3", label: "Admin" },
     { value: "4", label: "Super Admin" }
   ];
-
+  function getOption(number) {
+    var index = options.findIndex(x => x.value === number);
+    return options[index].label;
+  }
   return (
     <div>
       <GridContainer>
@@ -143,6 +146,7 @@ function UserProfile(props) {
                 {user.email.toLowerCase()}
               </h5>
               <h4 className={classes.cardTitle}>{user.fullName}</h4>
+              <h4 className={classes.cardTitle}>{getOption(user.role)}</h4>
 
               <Button color="primary" round>
                 Follow

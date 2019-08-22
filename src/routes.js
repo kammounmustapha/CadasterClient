@@ -38,99 +38,68 @@ import Users from "views/Users/Users";
 import LicenseRequests from "views/LicenseRequests/LicenseRequests";
 import LicenseRequestsEdit from "views/LicenseRequests/LicenseRequestsEdit";
 import LicenseRequestsNew from "views/LicenseRequests/LicenseRequestsNew";
+import AuthService from "layouts/AuthService";
 // core components/views for RTL layout
-const dashboardRoutes = [
+function getRoutes() {
+  //const authService = new AuthService();
+  // console.log(authService.getProfile().role);
+  var dashboardRoutes = [];
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    rtlName: "لوحة القيادة",
-    icon: Dashboard,
-    component: DashboardPage,
-    layout: "/admin"
-  },
-  {
-    path: "/users",
-    name: "Users",
-    icon: UserIcon,
-    component: Users,
-    layout: "/admin"
-  },
-  {
-    path: "/companies",
-    name: "Companies",
-    icon: Company,
-    component: Companies,
-    layout: "/admin"
-  },
-  {
-    path: "/lincenseApplications",
-    name: "License Applications",
-    icon: work,
-    component: LicenseRequests,
-    layout: "/admin"
-  },
-  {
-    path: "/lincenseApplicationsNew",
-    layout: "/admin",
-    component: LicenseRequestsNew,
-    icon: work,
-    name: "Apply for a license"
-  },
-  {
-    path: "/LicenseApplicationsEdit",
-    layout: "/admin",
-    component: LicenseRequestsEdit,
-    icon: work,
-    name: "Edit License Application"
-  },
-  {
-    path: "/user",
-    name: "User Profile",
-    rtlName: "ملف تعريفي للمستخدم",
-    icon: Person,
-    component: UserProfile,
-    layout: "/admin"
-  },
-  {
-    path: "/table",
-    name: "Table List",
-    rtlName: "قائمة الجدول",
-    icon: "content_paste",
-    component: TableList,
-    layout: "/admin"
-  },
-  {
-    path: "/typography",
-    name: "Typography",
-    rtlName: "طباعة",
-    icon: LibraryBooks,
-    component: Typography,
-    layout: "/admin"
-  },
-  {
-    path: "/icons",
-    name: "Icons",
-    rtlName: "الرموز",
-    icon: BubbleChart,
-    component: Icons,
-    layout: "/admin"
-  },
-  {
-    path: "/maps",
-    name: "Maps",
-    rtlName: "خرائط",
-    icon: LocationOn,
-    component: Maps,
-    layout: "/admin"
-  },
-  {
-    path: "/notifications",
-    name: "Notifications",
-    rtlName: "إخطارات",
-    icon: Notifications,
-    component: NotificationsPage,
-    layout: "/admin"
+    dashboardRoutes = [
+      {
+        path: "/dashboard",
+        name: "Dashboard",
+        rtlName: "لوحة القيادة",
+        icon: Dashboard,
+        component: DashboardPage,
+        layout: "/admin"
+      },
+      {
+        path: "/users",
+        name: "Users",
+        icon: UserIcon,
+        component: Users,
+        layout: "/admin"
+      },
+      {
+        path: "/companies",
+        name: "Companies",
+        icon: Company,
+        component: Companies,
+        layout: "/admin"
+      },
+      {
+        path: "/lincenseApplications",
+        name: "License Applications",
+        icon: work,
+        component: LicenseRequests,
+        layout: "/admin"
+      },
+      {
+        path: "/lincenseApplicationsNew",
+        layout: "/admin",
+        component: LicenseRequestsNew,
+        icon: work,
+        name: "Apply for a license"
+      },
+      {
+        path: "/LicenseApplicationsEdit",
+        layout: "/admin",
+        component: LicenseRequestsEdit,
+        icon: work,
+        name: "Edit License Application"
+      },
+      {
+        path: "/user",
+        name: "User Profile",
+        rtlName: "ملف تعريفي للمستخدم",
+        icon: Person,
+        component: UserProfile,
+        layout: "/admin"
+      }
+    ];
   }
-];
-
+  return dashboardRoutes;
+}
+const dashboardRoutes = getRoutes();
 export default dashboardRoutes;

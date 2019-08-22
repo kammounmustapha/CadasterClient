@@ -8,34 +8,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import LicenseRequestsService from "../../services/LicenseRequestsService";
 import CompanyService from "../../services/CompanyService";
 import Button from "components/CustomButtons/Button.jsx";
-import { getLicenseTypes, getCompanies, matchData } from "./data";
+import { getLicenseTypes, getCountries, getCommodities } from "./data";
 import TextField from "@material-ui/core/TextField";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 import withStyles from "@material-ui/core/styles/withStyles";
 import { Tabs, Tab, Panel } from "@bumaga/tabs";
 import LeafletDraw from "./LeafletDraw";
 import IntegrationReactSelect from "./select";
-const useStyles = makeStyles(theme => ({
-  container: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  textField: {
-    marginLeft: "10px",
-    marginRight: "10px",
-    width: 200
-  },
-  dense: {
-    marginTop: 19
-  },
-  menu: {
-    width: 200
-  },
-  button: {
-    position: "absolute",
-    left: true
-  }
-}));
+import SelectMultiple from "./selectMultiple";
 
 class LicenseRequestsNew extends Component {
   constructor(props) {
@@ -45,14 +25,14 @@ class LicenseRequestsNew extends Component {
       type: "",
       parties: "",
       peggedDate: "07-08-2019",
-      commodityGroups: "",
+      commodityGroups: [],
       jurisdiction: "",
       region: "",
       district: "",
       project: "",
       responsbileOffice: "",
       comments: "",
-      company: "",
+      company: [],
       value: "",
       companiesList: [],
       currentLicenseId: "",
@@ -78,28 +58,27 @@ class LicenseRequestsNew extends Component {
     this.setState({ type: value });
   };
   inputChangedHandler2 = value => {
-    console.log(value);
     this.setState({ company: value });
   };
-  validateForm = () => {
-    if (
-      this.state.name.length !== "" &&
-      this.state.parties.length !== "" &&
-      this.state.commodityGroups.length !== "" &&
-      this.state.jusrisdiction.length !== "" &&
-      this.state.region.length !== "" &&
-      this.state.district.length !== "" &&
-      this.state.project.length !== ""
-    )
-      return false;
-    else return true;
+  inputChangedHandler3 = value => {
+    this.setState({ jurisdiction: value.label });
+    console.log(value.label);
   };
+  inputChangedHandler4 = value => {
+    this.setState({ commodityGroups: value });
+  };
+
   handleSubmit = event => {
     event.preventDefault();
+    var list = [];
+    this.state.company.map(element => {
+      list.push(element.object);
+    });
+
     const licenseApplication = {
       name: this.state.name,
       type: this.state.type,
-      parties: this.state.parties,
+      parties: list,
       peggedDate: this.state.peggedDate,
       commodityGroups: this.state.commodityGroups,
       jurisdiction: this.state.jurisdiction,
@@ -108,7 +87,7 @@ class LicenseRequestsNew extends Component {
       project: this.state.project,
       responsibleOffice: this.state.responsibleOffice,
       comments: this.state.comments,
-      company: this.state.company.object,
+      company: list,
       etat: 0
     };
     this.licenseRequestsService
@@ -157,7 +136,7 @@ class LicenseRequestsNew extends Component {
                         onSubmit={this.handleSubmit}
                       >
                         <GridItem xs={12} sm={12} md={12}>
-                          <IntegrationReactSelect
+                          <SelectMultiple
                             id="company"
                             value={this.state.company}
                             data={this.state.companiesList}
@@ -187,16 +166,6 @@ class LicenseRequestsNew extends Component {
                         <GridItem xs={12} sm={12} md={12}>
                           <TextField
                             required
-                            id="parties"
-                            label="Parties"
-                            className={classes.textField}
-                            value={this.state.parties}
-                            onChange={this.handleChange}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
-                          />
-                          <TextField
-                            required
                             id="peggedDate"
                             label="Pegged Date"
                             type="date"
@@ -207,27 +176,25 @@ class LicenseRequestsNew extends Component {
                             margin="normal"
                             style={{ paddingRight: "20px", width: "170px" }}
                           />
-                          <TextField
-                            required
+
+                          <SelectMultiple
                             id="commodityGroups"
-                            label="Commodity Groups"
-                            className={classes.textField}
                             value={this.state.commodityGroups}
-                            onChange={this.handleChange}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
+                            data={getCommodities()}
+                            message="Choose the commodity groups"
+                            label="Commodity Groups"
+                            value={this.state.commodityGroups}
+                            newVal={this.inputChangedHandler4}
                           />
                         </GridItem>
                         <GridItem xs={12} sm={12} md={12}>
-                          <TextField
-                            required
+                          <IntegrationReactSelect
                             id="jurisdiction"
-                            label="jurisdiction"
-                            className={classes.textField}
                             value={this.state.jurisdiction}
-                            onChange={this.handleChange}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "170px" }}
+                            data={getCountries()}
+                            message="choose the jurisdiction country"
+                            label="Jurisdiction"
+                            newVal={this.inputChangedHandler3}
                           />
                           <TextField
                             id="region"
@@ -331,6 +298,7 @@ class LicenseRequestsNew extends Component {
           <LeafletDraw
             onCreate={this.onCreate}
             onDelete={this.onDelete}
+            type="new"
           ></LeafletDraw>
         </Panel>
       </Tabs>

@@ -68,13 +68,43 @@ class Dashboard extends React.Component {
     hasImage: true,
     fixedClasses: "dropdown show",
     mobileOpen: false,
-    current_user: this.authService.getProfile()
+    current_user: this.authService.getProfile(),
+    routes: routes,
+    switchRoutes: switchRoutes
   };
   componentWillMount() {
     if (!this.authService.loggedIn()) {
       this.props.history.push("/login");
     }
+    if (this.authService.getProfile().role !== "4") {
+      var r = [];
+      routes.map(element => {
+        if (element.name !== "Users") {
+          r.push(element);
+        }
+      });
+      this.setState({ routes: r });
+      var sr = (
+        <Switch>
+          {r.map((prop, key) => {
+            if (prop.layout === "/admin") {
+              return (
+                <Route
+                  path={prop.layout + prop.path}
+                  component={prop.component}
+                  key={key}
+                />
+              );
+            }
+            return null;
+          })}
+          <Redirect from="/admin" to="/admin/dashboard" />
+        </Switch>
+      );
+      this.setState({ switchRoutes: sr });
+    }
   }
+
   mainPanel = React.createRef();
   handleImageClick = image => {
     this.setState({ image: image });
@@ -125,7 +155,7 @@ class Dashboard extends React.Component {
     return (
       <div className={classes.wrapper}>
         <Sidebar
-          routes={routes}
+          routes={this.state.routes}
           logoText={"Cadaster"}
           logo={logo}
           image={this.state.image}
@@ -136,7 +166,7 @@ class Dashboard extends React.Component {
         />
         <div className={classes.mainPanel} ref={this.mainPanel}>
           <Navbar
-            routes={routes}
+            routes={this.state.routes}
             handleDrawerToggle={this.handleDrawerToggle}
             current_user={this.state.current_user}
             {...rest}
@@ -144,10 +174,10 @@ class Dashboard extends React.Component {
           {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
           {this.getRoute() ? (
             <div className={classes.content}>
-              <div className={classes.container}>{switchRoutes}</div>
+              <div className={classes.container}>{this.state.switchRoutes}</div>
             </div>
           ) : (
-            <div className={classes.map}>{switchRoutes}</div>
+            <div className={classes.map}>{this.state.switchRoutes}</div>
           )}
           {this.getRoute() ? <Footer /> : null}
         </div>

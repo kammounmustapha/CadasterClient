@@ -37,6 +37,19 @@ export default class LicenseRequestsService {
       return Promise.resolve(res);
     });
   }
+  getAllByUser() {
+    var array = [];
+    this.getAll().then(res => {
+      res.docs.map(element => {
+        if (
+          element.properties.user._id === this.authService.getUserProfile._id
+        ) {
+          array.push(element);
+        }
+      });
+    });
+    return array;
+  }
   async getAll() {
     return await this.fetch(`${this.domain}/licenseApplication`, {
       method: "GET"

@@ -10,11 +10,12 @@ class LeafletDraw extends Component {
   }
 
   _onEdited = e => {
-    let numEdited = 0;
+    /*let numEdited = 0;
     e.layers.eachLayer(layer => {
       numEdited += 1;
     });
     console.log(`_onEdited: edited ${numEdited} layers`, e);
+    */
 
     this._onChange();
   };
@@ -71,9 +72,10 @@ class LeafletDraw extends Component {
     return (
       <div>
         <Map
+          center={this.getCenter()}
           style={{ height: "600px", width: "900px" }}
-          center={[2.2, 1.3]}
-          zoom={4}
+          // center={[2.2, 1.3]}
+          zoom={this.getZoom()}
           zoomControl={false}
         >
           <TileLayer
@@ -122,6 +124,21 @@ class LeafletDraw extends Component {
     const geojsonData = this._editableFG.leafletElement.toGeoJSON();
     onChange(geojsonData);
   };
+  getZoom() {
+    if (this.props.type === "edit") {
+      return 12;
+    } else return 8;
+  }
+  getCenter() {
+    if (this.props.type === "edit") {
+      return [
+        this.props.currentApplication.geometry.coordinates[0][0][1],
+        this.props.currentApplication.geometry.coordinates[0][0][0]
+      ];
+    } else {
+      return [2.2, 1.3];
+    }
+  }
 }
 
 export default LeafletDraw;

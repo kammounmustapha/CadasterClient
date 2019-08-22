@@ -85,6 +85,13 @@ class LicenseRequests extends React.Component {
     localStorage.setItem("currentLicenceApplication", application._id);
     this.props.history.push("/admin/LicenseApplicationsEdit");
   };
+  getText = array => {
+    var text = "";
+    array.map(element => {
+      text += element.fullName + " , ";
+    });
+    return text;
+  };
   render() {
     const { classes } = this.props;
 
@@ -122,7 +129,7 @@ class LicenseRequests extends React.Component {
                     "Pegged date",
                     "Region",
                     "Project",
-                    "Company",
+                    "Status",
                     "responsible Office"
                   ]}
                   tableData={this.state.applicationsListFinal.map(
@@ -130,7 +137,8 @@ class LicenseRequests extends React.Component {
                       const { properties } = application;
                       return [
                         <b>{properties.name}</b>,
-                        <b>{properties.parties}</b>,
+                        //     <b>{properties.parties}</b>,
+                        <b>{this.getText(properties.parties)}</b>,
                         <b>
                           {properties.type.label +
                             "(" +
@@ -140,7 +148,7 @@ class LicenseRequests extends React.Component {
                         <b>{properties.peggedDate}</b>,
                         <b>{properties.region}</b>,
                         <b>{properties.project}</b>,
-                        <b>{properties.company.fullName}</b>,
+                        <b>{properties.status}</b>,
                         <b>{properties.responsibleOffice}</b>,
                         <Fab
                           color="secondary"
