@@ -1,33 +1,34 @@
 import AuthService from "../layouts/AuthService";
-export default class LicenseRequestsService {
+
+export default class LicensesService {
   constructor(domain) {
     this.domain = domain || "http://localhost:3000"; // API server domain
     this.fetch = this.fetch.bind(this); // React binding stuff
     this.authService = new AuthService();
   }
 
-  addApplication(licenseApplication) {
-    return this.fetch(`${this.domain}/licenseApplication`, {
+  addLicense(license) {
+    return this.fetch(`${this.domain}/license`, {
       method: "POST",
-      body: JSON.stringify(licenseApplication)
+      body: JSON.stringify(license)
     }).then(res => {
       return Promise.resolve(res);
     });
   }
-  deleteApplication(id) {
-    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
+  deleteLicense(id) {
+    return this.fetch(`${this.domain}/license/${id}`, {
       method: "DELETE"
     }).then(res => {
       return Promise.resolve(res);
     });
   }
 
-  updateApplication(id, updatedApplication) {
-    return this.fetch(`${this.domain}/licenseApplication/${id}`, {
+  updateLicense(id, updatedLicense) {
+    return this.fetch(`${this.domain}/license/${id}`, {
       method: "PUT",
-      body: JSON.stringify(updatedApplication)
+      body: JSON.stringify(updatedLicense)
     }).then(res => {
-      return Promise.resolve(res);
+      return Promise.resolve(res.doc);
     });
   }
   async getById(id) {
@@ -36,20 +37,6 @@ export default class LicenseRequestsService {
     }).then(res => {
       return Promise.resolve(res);
     });
-  }
-  getAllByUser() {
-    var array = [];
-
-    this.getAll().then(res => {
-      res.docs.map(element => {
-        if (
-          element.properties.user.email === this.authService.getProfile().email
-        ) {
-          array.push(element);
-        }
-      });
-    });
-    return array;
   }
   async getAll() {
     return await this.fetch(`${this.domain}/licenseApplication`, {

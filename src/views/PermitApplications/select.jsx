@@ -369,7 +369,7 @@ export default function IntegrationReactSelect(props) {
     <div className={classes.root}>
       <NoSsr>
         <Select
-          isDisabled={true}
+          isDisabled={props.isDisabled}
           classes={classes}
           styles={selectStyles}
           inputId={props.id}

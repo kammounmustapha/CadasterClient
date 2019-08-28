@@ -38,7 +38,9 @@ import Users from "views/Users/Users";
 import LicenseRequests from "views/LicenseRequests/LicenseRequests";
 import LicenseRequestsEdit from "views/LicenseRequests/LicenseRequestsEdit";
 import LicenseRequestsNew from "views/LicenseRequests/LicenseRequestsNew";
-import AuthService from "layouts/AuthService";
+import PermitApplications from "views/PermitApplications/PermitApplications";
+import PermitApplicationsNew from "views/PermitApplications/PermitApplicationsNew";
+import PermitApplicationsEdit from "views/PermitApplications/PermitApplicationsEdit";
 // core components/views for RTL layout
 function getRoutes() {
   //const authService = new AuthService();
@@ -76,6 +78,13 @@ function getRoutes() {
         layout: "/admin"
       },
       {
+        path: "/permitApplications",
+        name: "Permit Applications",
+        icon: work,
+        component: PermitApplications,
+        layout: "/admin"
+      },
+      {
         path: "/lincenseApplicationsNew",
         layout: "/admin",
         component: LicenseRequestsNew,
@@ -88,6 +97,20 @@ function getRoutes() {
         component: LicenseRequestsEdit,
         icon: work,
         name: "Edit License Application"
+      },
+      {
+        path: "/PermitApplicationsNew",
+        layout: "/admin",
+        component: PermitApplicationsNew,
+        icon: work,
+        name: "Apply for a new permit"
+      },
+      {
+        path: "/PermitApplicationsEdit",
+        layout: "/admin",
+        component: PermitApplicationsEdit,
+        icon: work,
+        name: "Edit permit Application"
       },
       {
         path: "/user",

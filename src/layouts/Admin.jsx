@@ -78,11 +78,31 @@ class Dashboard extends React.Component {
     }
     if (this.authService.getProfile().role !== "4") {
       var r = [];
-      routes.map(element => {
-        if (element.name !== "Users") {
-          r.push(element);
-        }
-      });
+
+      if (this.authService.getProfile().role === "1") {
+        routes.map(element => {
+          if (
+            element.name !== "Users" &&
+            element.path !== "/companies" &&
+            element.path !== "/lincenseApplications" &&
+            element.path !== "/lincenseApplicationsNew" &&
+            element.path !== "/lincenseApplicationsEdit"
+          ) {
+            r.push(element);
+          }
+        });
+      } else {
+        routes.map(element => {
+          if (
+            element.name !== "Users" &&
+            element.path !== "/permitApplications" &&
+            element.path !== "/permitApplicationsNew" &&
+            element.path !== "/permitApplicationsEdit"
+          ) {
+            r.push(element);
+          }
+        });
+      }
       this.setState({ routes: r });
       var sr = (
         <Switch>

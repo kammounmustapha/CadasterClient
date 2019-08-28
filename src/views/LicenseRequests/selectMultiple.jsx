@@ -347,7 +347,6 @@ export default function SelectMultiple(props) {
   function handleChangeMulti(value) {
     // setMulti(value);
     props.newVal(value);
-    console.log(value);
   }
   const selectStyles = {
     input: base => ({
@@ -358,13 +357,13 @@ export default function SelectMultiple(props) {
       }
     })
   };
-  console.log(props.value);
 
   return (
     <div className={classes.root}>
       <NoSsr>
         <div className={classes.divider} />
         <Select
+          isDisabled={true}
           classes={classes}
           styles={selectStyles}
           inputId={props.id}

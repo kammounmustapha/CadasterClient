@@ -83,9 +83,28 @@ class LeafletDraw extends Component {
             url="https://maps.heigit.org/openmapsurfer/tiles/roads/webmercator/{z}/{x}/{y}.png"
           />
           <FeatureGroup>
+            <EditControl
+              position="topright"
+              onEdited={this._onEdited}
+              onCreated={this._onCreated}
+              onDeleted={this._onDeleted}
+              onMounted={this._onMounted}
+              onEditStart={this._onEditStart}
+              onEditStop={this._onEditStop}
+              onDeleteStart={this._onDeleteStart}
+              onDeleteStop={this._onDeleteStop}
+              draw={{
+                rectangle: false,
+                marker: false,
+                square: false,
+                polyline: false,
+                circlemarker: false,
+                circle: false
+              }}
+            />
             <GeoJSON
               data={this.props.currentApplication}
-              style={{ opacity: 1 }}
+              style={{ fillColor: "#0000ff", opacity: 2, weight: 2 }}
             />
           </FeatureGroup>
         </Map>

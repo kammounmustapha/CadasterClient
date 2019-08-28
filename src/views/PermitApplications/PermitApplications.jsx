@@ -1,21 +1,18 @@
-import React from "react";
+import React, { Component } from "react";
 import GridItem from "components/Grid/GridItem.jsx";
 import GridContainer from "components/Grid/GridContainer.jsx";
 import Table from "components/Table/Table.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
-import { makeStyles } from "@material-ui/core/styles";
-import LicenseRequestsService from "../../services/LicenseRequestsService";
+import { withStyles } from "@material-ui/styles";
+import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle";
 import Button from "components/CustomButtons/Button.jsx";
 import Fab from "@material-ui/core/Fab";
 import Icon from "@material-ui/core/Icon";
 import TextField from "@material-ui/core/TextField";
-
-import { Redirect } from "react-router-dom";
-import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle";
-import { withStyles } from "@material-ui/styles";
-
+import LicenseRequestsService from "../../services/LicenseRequestsService";
+import AuthService from "../../layouts/AuthService";
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -35,7 +32,7 @@ const styles = {
   }
 };
 
-class LicenseRequests extends React.Component {
+class PermitApplications extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -46,6 +43,7 @@ class LicenseRequests extends React.Component {
       message: ""
     };
     this.licenseRequestsService = new LicenseRequestsService();
+    this.authService = new AuthService();
   }
   filterApplications = e => {
     var updatedList = this.state.applicationsList;
@@ -72,18 +70,27 @@ class LicenseRequests extends React.Component {
   };
   componentDidMount = () => {
     this.licenseRequestsService.getAll().then(res => {
-      this.setState({
-        applicationsList: res.docs,
-        applicationsListFinal: res.docs
+      var array = [];
+      res.docs.map(element => {
+        if (
+          element.properties.user.email === this.authService.getProfile().email
+        ) {
+          array.push(element);
+        }
       });
+      this.setState({
+        applicationsList: array,
+        applicationsListFinal: array
+      });
+      console.log(res);
     });
   };
   handleNewButton = () => {
-    this.props.history.push("/admin/lincenseApplicationsNew");
+    this.props.history.push("/admin/PermitApplicationsNew");
   };
   handleEdit = application => {
     localStorage.setItem("currentLicenceApplication", application._id);
-    this.props.history.push("/admin/LicenseApplicationsEdit");
+    this.props.history.push("/admin/PermitApplicationsEdit");
   };
   getText = array => {
     var text = "";
@@ -163,6 +170,16 @@ class LicenseRequests extends React.Component {
                 />
               </CardBody>
             </Card>
+            <Button
+              onClick={this.handleNewButton}
+              color="primary"
+              style={{
+                marginRight: "900px",
+                position: "left"
+              }}
+            >
+              Add new license
+            </Button>
           </GridItem>
         </GridContainer>
       </div>
@@ -170,4 +187,4 @@ class LicenseRequests extends React.Component {
   }
 }
 
-export default withStyles(dashboardStyle)(LicenseRequests);
+export default withStyles(dashboardStyle)(PermitApplications);

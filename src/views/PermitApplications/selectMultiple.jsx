@@ -14,8 +14,8 @@ import CancelIcon from "@material-ui/icons/Cancel";
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
-    height: 80,
-    minWidth: 180
+    height: 100,
+    minWidth: 290
   },
   input: {
     display: "flex",
@@ -322,39 +322,33 @@ const components = {
   SingleValue,
   ValueContainer
 };
-export default function IntegrationReactSelect(props) {
+
+export default function SelectMultiple(props) {
   const classes = useStyles();
   const theme = useTheme();
   const [single, setSingle] = React.useState(null);
   const [multi, setMulti] = React.useState(null);
   var suggestions = [];
-
+  var selected = [];
   if (props.label === "Company") {
     suggestions = props.data.map(suggestion => ({
       value: suggestion.fullName,
       label: suggestion.fullName,
       object: suggestion
     }));
-  } else if (
-    props.label === "jurisdiction" ||
-    props.label === "commodity Groups"
-  ) {
+  } else {
     suggestions = props.data.map(suggestion => ({
       value: suggestion.name,
       label: suggestion.name
     }));
-  } else {
-    suggestions = props.data.map(suggestion => ({
-      value: suggestion.abbr,
-      label: suggestion.name
-    }));
+    selected = props.value;
   }
 
-  function handleChangeSingle(value) {
+  function handleChangeMulti(value) {
+    // setMulti(value);
     props.newVal(value);
-    //props.setSingle(value);
+    console.log(value);
   }
-
   const selectStyles = {
     input: base => ({
       ...base,
@@ -364,29 +358,30 @@ export default function IntegrationReactSelect(props) {
       }
     })
   };
+  console.log(props.value);
 
   return (
     <div className={classes.root}>
       <NoSsr>
+        <div className={classes.divider} />
         <Select
-          isDisabled={true}
+          isDisabled={props.isDisabled}
           classes={classes}
           styles={selectStyles}
           inputId={props.id}
           TextFieldProps={{
             label: props.label,
             InputLabelProps: {
-              htmlFor: "react-select-single",
+              htmlFor: props.label,
               shrink: true
             }
           }}
           placeholder={props.message}
           options={suggestions}
           components={components}
-          value={suggestions.find(op => {
-            return op.label === props.value;
-          })}
-          onChange={handleChangeSingle}
+          value={props.value}
+          onChange={handleChangeMulti}
+          isMulti
         />
       </NoSsr>
     </div>

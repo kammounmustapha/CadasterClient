@@ -14,21 +14,13 @@ import IntegrationReactSelect from "./select";
 import SelectMultiple from "./selectMultiple";
 import { getCountries, getLicenseTypes, getCommodities } from "./data";
 import CompanyService from "services/CompanyService";
-import AuthService from "layouts/AuthService";
-import LicenseService from "services/LicensesService";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import { Launcher } from "react-chat-window";
 import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
 
-class LicenseRequestsEdit extends Component {
+class PermitApplicationsEdit extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      applicationStatus: "",
       currentLicenceApplication: {},
       name: "",
       type: "",
@@ -42,37 +34,25 @@ class LicenseRequestsEdit extends Component {
       responsbileOffice: "",
       comments: "",
       company: "",
+      notAllowedToDraw: true,
+      nbDraw: 0,
       companiesList: [],
       MS: "",
-      openAccept: false,
-      openMessage: false,
-      openReject: false,
-      grantDate: "07-08-2019",
-      expiryDate: "07-08-2019",
-      rejectMessage: "",
       messageList: [],
-      buttonsDisabled: false
+      applicationStatus: "",
+      notAllowToChange: false
     };
     this.applicationService = new LicenseRequestsService();
     this.companyService = new CompanyService();
-    this.authService = new AuthService();
-    this.licenseService = new LicenseService();
-  }
-  componentWillMount() {
-    if (!localStorage.getItem("currentLicenceApplication")) {
-      this.props.history.replace("/admin/lincenseApplications");
-    }
   }
   componentDidMount() {
     this.applicationService
       .getById(localStorage.getItem("currentLicenceApplication"))
       .then(res => {
         this.setState({ currentLicenceApplication: res.doc }, () => {
-          const {
-            properties,
-            createdAt
-          } = this.state.currentLicenceApplication;
+          const { properties } = this.state.currentLicenceApplication;
           this.setState({
+            company: properties.company.fullName,
             type:
               properties.type.label /*+ " (" + properties.type.value + ")" */,
             name: properties.name,
@@ -85,15 +65,14 @@ class LicenseRequestsEdit extends Component {
             project: properties.project,
             responsibleOffice: properties.responsibleOffice,
             comments: properties.comments,
-            surface: properties.surface,
-            username: properties.user.fullName,
-            appDate: this.getDate(createdAt)
+            surface: properties.surface
           });
           if (properties.messages) {
             this.setState({ messageList: properties.messages });
           }
-          if (properties.approved != "0") {
-            this.setState({ buttonsDisabled: true });
+          if (properties.approved !== "0") {
+            this.setState({ notAllowToChange: true });
+
             if (properties.approved === "-1") {
               this.setState({
                 applicationStatus: (
@@ -120,16 +99,11 @@ class LicenseRequestsEdit extends Component {
       });
     this.companyService.getAll().then(res => {
       this.setState({ companiesList: res.companies }, () => {
-        var array = [];
-        array = this.state.parties.map(suggestion => ({
-          value: suggestion.fullName,
-          label: suggestion.fullName,
-          object: suggestion
-        }));
         var MS = (
           <SelectMultiple
+            isDisabled={this.state.notAllowToChange}
             id="company"
-            value={array}
+            value={this.getText()}
             data={this.state.companiesList}
             message="choose the company"
             label="Company"
@@ -140,27 +114,87 @@ class LicenseRequestsEdit extends Component {
       });
     });
   }
-  getDate(datestr) {
-    var date = new Date(datestr);
-    var d = date.getDate();
-    var m = date.getMonth();
-    var y = date.getFullYear();
-    var h = date.getHours();
-    var ms = date.getMinutes();
+  handleChange = e => {
+    if (!this.state.notAllowToChange) {
+      this.setState({ [e.target.id]: e.target.value });
+    }
+  };
+  handleSubmitInfos = event => {
+    event.preventDefault();
+    const newProperties = {
+      properties: {
+        name: this.state.name,
+        parties: this.state.parties,
+        peggedDate: this.state.peggedDate,
+        commodityGroups: this.state.commodityGroups,
+        jurisdiction: this.state.jurisdiction,
+        region: this.state.region,
+        district: this.state.district,
+        project: this.state.project,
+        responsibleOffice: this.state.responsibleOffice,
+        comments: this.state.comments,
+        type: this.state.currentLicenceApplication.properties.type,
+        company: this.state.currentLicenceApplication.properties.company,
+        user: this.state.currentLicenceApplication.properties.user
+      }
+    };
+    this.applicationService
+      .updateApplication(
+        this.state.currentLicenceApplication._id,
+        newProperties
+      )
+      .then(res => {
+        console.log("succeded!");
+        window.location.reload();
+      })
+      .catch(err => {
+        console.log("err " + err);
+      });
+  };
+  inputChangedHandler3 = value => {
+    this.setState({ jurisdiction: value.label });
+  };
+  inputChangedHandler4 = value => {
+    this.setState({ type: value });
+  };
+  inputChangedHandler1 = value => {
+    this.setState({ commodityGroups: value });
+  };
+  inputChangedHandler2 = value => {
+    console.log(value);
+    var array = [];
+    value.map(element => {
+      array.push(element.object);
+    });
+
+    this.setState({ company: array, parties: array });
+  };
+  renderPartiesMS() {
     return (
-      d.toString() +
-      "/" +
-      m.toString() +
-      "/" +
-      y.toString() +
-      "   " +
-      h.toString() +
-      ":" +
-      ms.toString()
+      <SelectMultiple
+        id="company"
+        value={this.getText()}
+        data={this.state.companiesList}
+        message="choose the company"
+        label="Company"
+        newVal={this.inputChangedHandler2}
+      />
     );
   }
+  getText() {
+    var array = [];
+    array = this.state.parties.map(suggestion => ({
+      value: suggestion.fullName,
+      label: suggestion.fullName,
+      object: suggestion
+    }));
+
+    return array;
+  }
+
   render() {
     const { classes } = this.props;
+    console.log(this.state.center);
     return (
       <div>
         <Tabs>
@@ -170,7 +204,7 @@ class LicenseRequestsEdit extends Component {
                 <Button color="primary">Information</Button>
               </Tab>
               <Tab>
-                <Button color="primary">Draw the Area</Button>
+                <Button color="primary">Draw the area</Button>
               </Tab>
             </center>
           </div>
@@ -183,8 +217,6 @@ class LicenseRequestsEdit extends Component {
                       <h4 className={classes.cardTitleWhite}>
                         Information about Application
                       </h4>
-
-                      {this.state.createdBy}
                     </CardHeader>
                     <CardBody>
                       {this.state.applicationStatus}
@@ -194,24 +226,9 @@ class LicenseRequestsEdit extends Component {
                         onSubmit={this.handleSubmitInfos}
                       >
                         <GridItem xs={12} sm={12} md={12}>
-                          <TextField
-                            id="CadasterApplicant"
-                            label="Cadaster Applicant"
-                            className={classes.textField}
-                            value={this.state.username}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "280px" }}
-                          />
-                          <TextField
-                            id="ApplicationDate"
-                            label="Application Date"
-                            className={classes.textField}
-                            value={this.state.appDate}
-                            margin="normal"
-                            style={{ paddingRight: "20px", width: "280px" }}
-                          />
                           {this.state.MS}
                           <IntegrationReactSelect
+                            isDisabled={this.state.notAllowToChange}
                             id="type"
                             value={this.state.type}
                             data={getLicenseTypes()}
@@ -226,8 +243,10 @@ class LicenseRequestsEdit extends Component {
                             label="License Name"
                             className={classes.textField}
                             value={this.state.name}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
+                            required
                           />
                         </GridItem>
                         <GridItem>
@@ -239,10 +258,12 @@ class LicenseRequestsEdit extends Component {
                             defaultValue="2019-08-10"
                             className={classes.textField}
                             value={this.state.peggedDate}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
                           />
                           <SelectMultiple
+                            isDisabled={this.state.notAllowToChange}
                             id="commodityGroups"
                             value={this.state.commodityGroups}
                             data={getCommodities()}
@@ -254,6 +275,7 @@ class LicenseRequestsEdit extends Component {
                         </GridItem>
                         <GridItem xs={12} sm={12} md={12}>
                           <IntegrationReactSelect
+                            isDisabled={this.state.notAllowToChange}
                             id="jurisdiction"
                             value={this.state.jurisdiction}
                             data={getCountries()}
@@ -268,6 +290,7 @@ class LicenseRequestsEdit extends Component {
                             label="Region"
                             className={classes.textField}
                             value={this.state.region}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
                           />
@@ -279,6 +302,7 @@ class LicenseRequestsEdit extends Component {
                             label="District"
                             className={classes.textField}
                             value={this.state.district}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
                           />
@@ -288,6 +312,7 @@ class LicenseRequestsEdit extends Component {
                             label="Project"
                             className={classes.textField}
                             value={this.state.project}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
                           />
@@ -299,6 +324,7 @@ class LicenseRequestsEdit extends Component {
                             label="Responsible Office"
                             className={classes.textField}
                             value={this.state.responsibleOffice}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "280px" }}
                           />
@@ -310,12 +336,23 @@ class LicenseRequestsEdit extends Component {
                             type="textarea"
                             className={classes.textField}
                             value={this.state.comments}
+                            onChange={this.handleChange}
                             margin="normal"
                             style={{ paddingRight: "20px", width: "270px" }}
                             multiline={true}
                             rows={4}
                             rowsMax={8}
                           />
+                        </GridItem>
+                        <GridItem>
+                          <Button
+                            type="submit"
+                            color="primary"
+                            style={{ marginTop: "20px", width: "100px" }}
+                            disabled={this.state.notAllowToChange}
+                          >
+                            Save
+                          </Button>
                         </GridItem>
                       </form>
                     </CardBody>
@@ -335,7 +372,10 @@ class LicenseRequestsEdit extends Component {
                     <GridContainer>
                       <Button
                         color="primary"
-                        disabled={this.state.notAllowedToDraw}
+                        disabled={
+                          this.state.notAllowedToDraw &&
+                          this.state.notAllowToChange
+                        }
                         onClick={this.submitGeometry}
                         style={{ marginRight: "20px", width: "100px" }}
                       >
@@ -350,6 +390,9 @@ class LicenseRequestsEdit extends Component {
                     </GridContainer>
                     <GridContainer xs={18} sm={2} md={2}>
                       <LeafletDraw
+                        onCreate={this.onCreate}
+                        onDelete={this.onDelete}
+                        onEdit={this.onEdit}
                         currentApplication={
                           this.state.currentLicenceApplication
                         }
@@ -362,181 +405,32 @@ class LicenseRequestsEdit extends Component {
             </GridContainer>
           </Panel>
         </Tabs>
-        <GridContainer>
-          <Card>
-            <CardBody>
-              <GridContainer xs={18} sm={12} md={12}>
-                <Button
-                  style={{ backgroundColor: "#00f601" }}
-                  onClick={() => {
-                    this.setState({ openAccept: true });
-                  }}
-                  disabled={this.state.buttonsDisabled}
-                >
-                  Accept
-                </Button>
-                <Button
-                  onClick={() => {
-                    this.setState({ openReject: true });
-                  }}
-                  style={{ backgroundColor: "#fe270b" }}
-                  disabled={this.state.buttonsDisabled}
-                >
-                  Reject
-                </Button>
-                <div>
-                  <Launcher
-                    agentProfile={{
-                      teamName: "chat",
-                      imageUrl:
-                        "https://a.slack-edge.com/66f9/img/avatars-teams/ava_0001-34.png"
-                    }}
-                    newMessagesCount={0}
-                    onMessageWasSent={this._onMessageWasSent.bind(this)}
-                    messageList={this.state.messageList}
-                  />
-                </div>
-              </GridContainer>
-              <div>
-                <Dialog
-                  open={this.state.openAccept}
-                  onClose={this.handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">Accept</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      To Accept this permit Application, please indicate the
-                      grant and expiry dates
-                    </DialogContentText>
-                    <TextField
-                      autoFocus
-                      value={this.state.grantDate}
-                      margin="dense"
-                      id="grantDate"
-                      label="Grant Date"
-                      type="date"
-                      onChange={this.handleChange}
-                      fullWidth
-                    />
-                    <TextField
-                      autoFocus
-                      value={this.state.expiryDate}
-                      margin="dense"
-                      id="expiryDate"
-                      label="Expiry Date"
-                      type="date"
-                      onChange={this.handleChange}
-                      fullWidth
-                    />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={this.handleClose} color="primary">
-                      Cancel
-                    </Button>
-                    <Button onClick={this.handleSubmitAccept} color="primary">
-                      Accept
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </div>
-              <div>
-                <Dialog
-                  open={this.state.openReject}
-                  onClose={this.handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">Reject</DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      To Reject this application, please leave a message
-                      explaining the rejection reason(s)
-                    </DialogContentText>
-                    <TextField
-                      autoFocus
-                      value={this.state.rejectMessage}
-                      margin="dense"
-                      id="rejectMessage"
-                      label="Reject reasons"
-                      type="textfield"
-                      onChange={this.handleChange}
-                      fullWidth
-                    />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={this.handleClose} color="primary">
-                      Cancel
-                    </Button>
-                    <Button onClick={this.handleSubmitReject} color="primary">
-                      Reject
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </div>
-            </CardBody>
-          </Card>
-        </GridContainer>
+        <div>
+          <Launcher
+            agentProfile={{
+              teamName: "chat",
+              imageUrl:
+                "https://a.slack-edge.com/66f9/img/avatars-teams/ava_0001-34.png"
+            }}
+            newMessagesCount={0}
+            onMessageWasSent={this._onMessageWasSent.bind(this)}
+            messageList={this.state.messageList}
+          />
+        </div>
       </div>
     );
   }
-  handleClose = () => {
-    this.setState({ openAccept: false, openReject: false, openMessage: false });
-  };
-  handleChange = e => {
-    this.setState({ [e.target.id]: e.target.value });
-  };
-  handleSubmitAccept = e => {
-    this.applicationService
-      .updateApplication(this.state.currentLicenceApplication._id, {
-        "properties.approved": "+1",
-        "properties.status": "َActive"
-      })
-      .then(res1 => {
-        alert("success");
-      })
-      .catch(err1 => {
-        alert("err");
-      });
-    var newLicense = this.state.currentLicenceApplication;
-    delete newLicense._id;
-    delete newLicense.properties.approved;
-    newLicense.properties.appliedAt = newLicense.createdAt;
-    delete newLicense.createdAt;
-    delete newLicense.updatedAt;
-    newLicense.properties.grantDate = this.state.grantDate;
-    newLicense.properties.expiryDate = this.state.expiryDate;
-    newLicense.properties.status = "Active";
-    this.licenseService.addLicense(newLicense).then(res => {
-      console.log(res.doc);
-    });
-
-    this.handleClose();
-  };
-  handleSubmitReject = e => {
-    this.applicationService
-      .updateApplication(this.state.currentLicenceApplication._id, {
-        "properties.approved": "-1",
-        "properties.status": "Rejected"
-      })
-      .then(res => {
-        alert("success");
-      })
-      .catch(err => {
-        alert("err");
-      });
-  };
   _onMessageWasSent(message) {
     message.data.text +=
       " \n (Sent by: " +
-      this.authService.getProfile().fullName +
-      ": Cadaster Manager" +
+      this.state.currentLicenceApplication.properties.user.fullName +
+      ": Cadaster Applicant" +
       "\n at: " +
       Date(Date.now())
         .toString()
         .slice(4, 21) +
       " )";
-    message.author = "them";
-    message.owner = this.authService.getProfile();
+    message.author = "me";
     console.log(message);
     this.setState(
       {
@@ -551,6 +445,56 @@ class LicenseRequestsEdit extends Component {
       }
     );
   }
+  onDelete = e => {
+    if (this.state.nbDraw > 1) {
+      this.setState({ nbDraw: this.state.nbDraw - 1 });
+    } else {
+      this.setState({
+        bDraw: this.state.nbDraw - 1,
+        notAllowedToDraw: true,
+        surface: ""
+      });
+    }
+  };
+  onCreate = (geo, surface) => {
+    this.setState({
+      geometry: geo,
+      nbDraw: this.state.nbDraw + 1,
+      surface: (surface / 100).toFixed(2) + " Ha",
+      notAllowedToDraw: false
+    });
+    if (this.state.nbDraw > 1) {
+      this.setState({
+        notAllowedToDraw: true
+      });
+    }
+  };
+  onEdit = (geo, surface) => {
+    this.setState({
+      geometry: geo,
+      surface: (surface / 100).toFixed(2) + " Ha",
+      notAllowedToDraw: false
+    });
+  };
+  submitGeometry = e => {
+    e.preventDefault();
+    const g = {
+      "properties.surface": this.state.surface,
+      geometry: {
+        type: "Polygon",
+        coordinates: this.state.geometry
+      }
+    };
+    this.applicationService
+      .updateApplication(this.state.currentLicenceApplication._id, g)
+      .then(res => {
+        console.log("succeess");
+        this.props.history.replace("/admin/lincenseApplications");
+      })
+      .catch(err => {
+        console.log("err");
+      });
+  };
 }
 
-export default withStyles(dashboardStyle)(LicenseRequestsEdit);
+export default withStyles(dashboardStyle)(PermitApplicationsEdit);
