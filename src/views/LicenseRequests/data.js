@@ -1,7 +1,7 @@
 export function getLicenseTypes() {
   return [
     { abbr: "EPL", name: "Exclusive Prospecting License" },
-    { abbr: "EPL", name: "Exclusive Reconnaissance License" },
+    { abbr: "ERL", name: "Exclusive Reconnaissance License" },
     { abbr: "NEPL", name: "Non-Exclusive Prospecting License" },
     { abbr: "RL", name: "Reconnaissance License" },
     { abbr: "ML", name: "Mining License" },

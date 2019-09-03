@@ -16,7 +16,8 @@ import { getCountries, getLicenseTypes, getCommodities } from "./data";
 import CompanyService from "services/CompanyService";
 import { Launcher } from "react-chat-window";
 import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
-
+import Table from "components/Table/Table";
+import AuthService from "layouts/AuthService";
 class PermitApplicationsEdit extends Component {
   constructor(props) {
     super(props);
@@ -40,10 +41,13 @@ class PermitApplicationsEdit extends Component {
       MS: "",
       messageList: [],
       applicationStatus: "",
-      notAllowToChange: false
+      notAllowToChange: false,
+      actions: [],
+      actionsList: []
     };
     this.applicationService = new LicenseRequestsService();
     this.companyService = new CompanyService();
+    this.authService = new AuthService();
   }
   componentDidMount() {
     this.applicationService
@@ -65,8 +69,13 @@ class PermitApplicationsEdit extends Component {
             project: properties.project,
             responsibleOffice: properties.responsibleOffice,
             comments: properties.comments,
-            surface: properties.surface
+            surface: properties.surface,
+            actionsList: properties.actions
           });
+          var actions = properties.actions.map((el, i = 1) => {
+            return [i + 1, el.name, el.date, el.responsibleUser.fullName];
+          });
+          this.setState({ actions });
           if (properties.messages) {
             this.setState({ messageList: properties.messages });
           }
@@ -120,36 +129,38 @@ class PermitApplicationsEdit extends Component {
     }
   };
   handleSubmitInfos = event => {
-    event.preventDefault();
-    const newProperties = {
-      properties: {
-        name: this.state.name,
-        parties: this.state.parties,
-        peggedDate: this.state.peggedDate,
-        commodityGroups: this.state.commodityGroups,
-        jurisdiction: this.state.jurisdiction,
-        region: this.state.region,
-        district: this.state.district,
-        project: this.state.project,
-        responsibleOffice: this.state.responsibleOffice,
-        comments: this.state.comments,
-        type: this.state.currentLicenceApplication.properties.type,
-        company: this.state.currentLicenceApplication.properties.company,
-        user: this.state.currentLicenceApplication.properties.user
-      }
+    var action = {
+      name: "Information were Edited ",
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
     };
-    this.applicationService
-      .updateApplication(
-        this.state.currentLicenceApplication._id,
-        newProperties
-      )
-      .then(res => {
-        console.log("succeded!");
-        window.location.reload();
-      })
-      .catch(err => {
-        console.log("err " + err);
-      });
+    this.setState({ actionsList: [...this.state.actionsList, action] }, () => {
+      this.applicationService
+        .updateApplication(this.state.currentLicenceApplication._id, {
+          "properties.name": this.state.name,
+          "properties.parties": this.state.parties,
+          "properties.peggedDate": this.state.peggedDate,
+          "properties.commodityGroups": this.state.commodityGroups,
+          "properties.jurisdiction": this.state.jurisdiction,
+          "properties.region": this.state.region,
+          "properties.district": this.state.district,
+          "properties.project": this.state.project,
+          "properties.responsibleOffice": this.state.responsibleOffice,
+          "properties.comments": this.state.comments,
+          "properties.type": this.state.type,
+          "properties.company": this.state.company,
+          "properties.actions": this.state.actionsList
+        })
+        .then(res => {
+          console.log("succeded!");
+          window.location.reload();
+        })
+        .catch(err => {
+          console.log("err " + err);
+        });
+    });
   };
   inputChangedHandler3 = value => {
     this.setState({ jurisdiction: value.label });
@@ -205,6 +216,9 @@ class PermitApplicationsEdit extends Component {
               </Tab>
               <Tab>
                 <Button color="primary">Draw the area</Button>
+              </Tab>
+              <Tab>
+                <Button color="primary">Actions</Button>
               </Tab>
             </center>
           </div>
@@ -404,6 +418,29 @@ class PermitApplicationsEdit extends Component {
               </GridItem>
             </GridContainer>
           </Panel>
+          <Panel>
+            <GridContainer>
+              <GridItem xs={18} sm={12} md={12}>
+                <Card>
+                  <CardHeader color="primary">
+                    <h4 className={classes.cardTitleWhite}>Actions</h4>
+                  </CardHeader>
+                  <CardBody>
+                    <Table
+                      tableHeaderColor="primary"
+                      tableHead={[
+                        "Number",
+                        "Action",
+                        "Completed Date",
+                        "Responsible User"
+                      ]}
+                      tableData={this.state.actions}
+                    ></Table>
+                  </CardBody>
+                </Card>
+              </GridItem>
+            </GridContainer>
+          </Panel>
         </Tabs>
         <div>
           <Launcher
@@ -431,15 +468,25 @@ class PermitApplicationsEdit extends Component {
         .slice(4, 21) +
       " )";
     message.author = "me";
-    console.log(message);
+    var action = {
+      name: "Message sent: " + message.data.text,
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
+    };
+    console.log(this.state.actionsList);
     this.setState(
       {
-        messageList: [...this.state.messageList, message]
+        messageList: [...this.state.messageList, message],
+        actionsList: [...this.state.actionsList, action]
       },
       () => {
+        console.log(this.state.actionsList);
         this.applicationService
           .updateApplication(this.state.currentLicenceApplication._id, {
-            "properties.messages": this.state.messageList
+            "properties.messages": this.state.messageList,
+            "properties.actions": this.state.actionsList
           })
           .then(res => {});
       }
@@ -478,22 +525,33 @@ class PermitApplicationsEdit extends Component {
   };
   submitGeometry = e => {
     e.preventDefault();
-    const g = {
-      "properties.surface": this.state.surface,
-      geometry: {
-        type: "Polygon",
-        coordinates: this.state.geometry
-      }
+    var action = {
+      name: "Shape was Edited ",
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
     };
-    this.applicationService
-      .updateApplication(this.state.currentLicenceApplication._id, g)
-      .then(res => {
-        console.log("succeess");
-        this.props.history.replace("/admin/lincenseApplications");
-      })
-      .catch(err => {
-        console.log("err");
-      });
+    this.setState({ actionsList: [...this.state.actionsList, action] }, () => {
+      const g = {
+        "properties.surface": this.state.surface,
+        "properties.actions": this.state.actionsList,
+        geometry: {
+          type: "Polygon",
+          coordinates: this.state.geometry
+        }
+      };
+      this.applicationService
+        .updateApplication(this.state.currentLicenceApplication._id, g)
+        .then(res => {
+          console.log("succeess");
+          this.props.history.replace("/admin/PermitApplicationsEdit");
+          window.location.reload();
+        })
+        .catch(err => {
+          console.log("err");
+        });
+    });
   };
 }
 

@@ -47,7 +47,8 @@ const Sidebar = ({ ...props }) => {
           prop.path !== "/lincenseApplicationsNew" &&
           prop.path !== "/LicenseApplicationsEdit" &&
           prop.path !== "/PermitApplicationsNew" &&
-          prop.path !== "/PermitApplicationsEdit"
+          prop.path !== "/PermitApplicationsEdit" &&
+          prop.path !== "/LicenseEdit"
         ) {
           var activePro = " ";
           var listItemClasses;

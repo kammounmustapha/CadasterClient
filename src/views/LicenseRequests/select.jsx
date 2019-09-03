@@ -14,7 +14,8 @@ import CancelIcon from "@material-ui/icons/Cancel";
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
-    height: 80,
+    height: 60,
+    width: 400,
     minWidth: 180
   },
   input: {
@@ -369,7 +370,7 @@ export default function IntegrationReactSelect(props) {
     <div className={classes.root}>
       <NoSsr>
         <Select
-          isDisabled={true}
+          isDisabled={props.isDisabled}
           classes={classes}
           styles={selectStyles}
           inputId={props.id}

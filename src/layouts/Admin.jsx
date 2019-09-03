@@ -83,7 +83,7 @@ class Dashboard extends React.Component {
         routes.map(element => {
           if (
             element.name !== "Users" &&
-            element.path !== "/companies" &&
+            element.path !== "/Parties" &&
             element.path !== "/lincenseApplications" &&
             element.path !== "/lincenseApplicationsNew" &&
             element.path !== "/lincenseApplicationsEdit"

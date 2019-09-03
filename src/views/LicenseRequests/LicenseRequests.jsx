@@ -7,15 +7,13 @@ import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import { makeStyles } from "@material-ui/core/styles";
 import LicenseRequestsService from "../../services/LicenseRequestsService";
-import Button from "components/CustomButtons/Button.jsx";
 import Fab from "@material-ui/core/Fab";
 import Icon from "@material-ui/core/Icon";
 import TextField from "@material-ui/core/TextField";
-
-import { Redirect } from "react-router-dom";
+import IntegrationReactSelect from "./select";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle";
 import { withStyles } from "@material-ui/styles";
-
+import { getCountries, getLicenseTypes } from "./data";
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -43,38 +41,122 @@ class LicenseRequests extends React.Component {
       messageText: "",
       applicationsList: [],
       applicationsListFinal: [],
-      message: ""
+      jurisdictionFiltered: [],
+      typeFiltered: [],
+      searchFiltered: [],
+      message: "",
+      jurisdiction: "",
+      type: ""
     };
     this.licenseRequestsService = new LicenseRequestsService();
   }
   filterApplications = e => {
-    var updatedList = this.state.applicationsList;
-    updatedList = updatedList.filter(item => {
-      return (
-        item.properties.name
-          .toString()
-          .toLowerCase()
-          .search(e.target.value.toString().toLowerCase()) !== -1
-      );
-    });
-    this.setState({
-      applicationsListFinal: updatedList
-    });
-    if (updatedList == 0) {
-      this.setState({
-        message: true
+    if (e.target.value.toString().length === 0) {
+      this.setState({ searchFiltered: this.state.applicationsList }, () => {
+        this.makeIntersection();
       });
     } else {
-      this.setState({
-        message: false
+      var updatedList = [];
+      updatedList = this.state.applicationsList.filter(item => {
+        return (
+          item.properties.name
+            .toString()
+            .toLowerCase()
+            .search(e.target.value.toString().toLowerCase()) !== -1
+        );
       });
+      this.setState(
+        {
+          searchFiltered: updatedList
+        },
+        () => {}
+      );
+      this.makeIntersection();
+      if (updatedList == 0) {
+        this.setState({
+          message: true
+        });
+      } else {
+        this.setState({
+          message: false
+        });
+      }
     }
   };
+  filterApplicationsWithJurisdiction = value => {
+    this.setState({ jurisdiction: value });
+    if (value.label === "All") {
+      this.setState(
+        { jurisdictionFiltered: this.state.applicationsList },
+        () => {
+          this.makeIntersection();
+        }
+      );
+    } else {
+      var updatedList = [];
+
+      updatedList = this.state.applicationsList.filter(item => {
+        return (
+          item.properties.jurisdiction.toString().toLowerCase() ===
+          value.label.toString().toLowerCase()
+        );
+      });
+      this.setState(
+        {
+          jurisdictionFiltered: updatedList
+        },
+        () => {
+          this.makeIntersection();
+        }
+      );
+    }
+  };
+  filterApplicationsWithType = value => {
+    this.setState({ type: value });
+    if (value.value === "All") {
+      this.setState({ typeFiltered: this.state.applicationsList }, () => {
+        this.makeIntersection();
+      });
+    } else {
+      var updatedList = [];
+      updatedList = this.state.applicationsList.filter(item => {
+        return item.properties.type.value === value.value;
+      });
+
+      this.setState(
+        {
+          typeFiltered: updatedList
+        },
+        () => {
+          this.makeIntersection();
+        }
+      );
+    }
+  };
+
+  makeIntersection = () => {
+    var kiran = [];
+    var kiran2 = [];
+    var array1 = this.state.typeFiltered;
+    var array2 = this.state.searchFiltered;
+    var array3 = this.state.jurisdictionFiltered;
+    if (array1.length === 0 || array2.length === 0 || array3.length === 0) {
+      this.setState({ applicationsListFinal: [] });
+    }
+
+    kiran = array1.filter(a => array2.some(b => a._id === b._id));
+    kiran2 = array3.filter(a => kiran.some(b => b._id === a._id));
+    this.setState({ applicationsListFinal: kiran2 });
+  };
+
   componentDidMount = () => {
     this.licenseRequestsService.getAll().then(res => {
       this.setState({
         applicationsList: res.docs,
-        applicationsListFinal: res.docs
+        applicationsListFinal: res.docs,
+        jurisdictionFiltered: res.docs,
+        searchFiltered: res.docs,
+        typeFiltered: res.docs
       });
     });
   };
@@ -92,8 +174,13 @@ class LicenseRequests extends React.Component {
     });
     return text;
   };
+
   render() {
     const { classes } = this.props;
+    var TypesList = getLicenseTypes();
+    TypesList.unshift({ abbr: "All", name: "All" });
+    var CountriesList = getCountries();
+    CountriesList.unshift({ name: "All", code: "All" });
 
     return (
       <div>
@@ -111,15 +198,34 @@ class LicenseRequests extends React.Component {
                 </p>
               </CardHeader>
               <CardBody>
-                <TextField
-                  id="search"
-                  label="Search"
-                  type="search"
-                  className={classes.textField}
-                  margin="normal"
-                  onChange={this.filterApplications}
-                />
-                {this.state.message ? <li>No search results.</li> : ""}
+                <GridItem xs={12} sm={12} md={12}>
+                  <TextField
+                    id="search"
+                    label="Search"
+                    type="search"
+                    className={classes.textField}
+                    margin="normal"
+                    onChange={this.filterApplications}
+                    style={{ width: 400 }}
+                  />
+                  {this.state.message ? <li>No search results.</li> : ""}
+                  <IntegrationReactSelect
+                    id="jurisdiction"
+                    value={this.state.jurisdiction}
+                    data={CountriesList}
+                    //  message="choose the jurisdiction country"
+                    label="Jurisdiction"
+                    newVal={this.filterApplicationsWithJurisdiction}
+                  />
+                  <IntegrationReactSelect
+                    id="type"
+                    value={this.state.type}
+                    data={TypesList}
+                    label="Type"
+                    newVal={this.filterApplicationsWithType}
+                  />
+                </GridItem>
+
                 <Table
                   tableHeaderColor="primary"
                   tableHead={[

@@ -32,14 +32,14 @@ export default class LicensesService {
     });
   }
   async getById(id) {
-    return await this.fetch(`${this.domain}/licenseApplication/${id}`, {
+    return await this.fetch(`${this.domain}/license/${id}`, {
       method: "GET"
     }).then(res => {
       return Promise.resolve(res);
     });
   }
   async getAll() {
-    return await this.fetch(`${this.domain}/licenseApplication`, {
+    return await this.fetch(`${this.domain}/license`, {
       method: "GET"
     });
   }

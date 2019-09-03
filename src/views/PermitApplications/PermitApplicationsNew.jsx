@@ -16,6 +16,7 @@ import { Tabs, Tab, Panel } from "@bumaga/tabs";
 import LeafletDraw from "./LeafletDraw";
 import IntegrationReactSelect from "./select";
 import SelectMultiple from "./selectMultiple";
+import AuthService from "layouts/AuthService";
 class PermitApplicationNew extends Component {
   constructor(props) {
     super(props);
@@ -44,6 +45,7 @@ class PermitApplicationNew extends Component {
     this.data = getLicenseTypes();
     this.companyService = new CompanyService();
     this.licenseRequestsService = new LicenseRequestsService();
+    this.authService = new AuthService();
   }
   componentDidMount() {
     this.companyService.getAll().then(res => {
@@ -73,7 +75,14 @@ class PermitApplicationNew extends Component {
     this.state.company.map(element => {
       list.push(element.object);
     });
-
+    var actions = [];
+    actions.push({
+      name: "Creation of Application",
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
+    });
     const licenseApplication = {
       name: this.state.name,
       type: this.state.type,
@@ -87,7 +96,8 @@ class PermitApplicationNew extends Component {
       responsibleOffice: this.state.responsibleOffice,
       comments: this.state.comments,
       company: list,
-      etat: 0
+      etat: 0,
+      actions: actions
     };
     this.licenseRequestsService
       .addApplication(licenseApplication)
@@ -319,21 +329,35 @@ class PermitApplicationNew extends Component {
   };
   submitGeometry = e => {
     e.preventDefault();
-    const g = {
-      "properties.surface": this.state.surface,
-      geometry: {
-        type: "Polygon",
-        coordinates: [this.state.geometry]
-      }
-    };
     this.licenseRequestsService
-      .updateApplication(this.state.currentLicenseId, g)
+      .getById(this.state.currentLicenseId)
       .then(res => {
-        console.log("succeess");
-        this.props.history.replace("/admin/permitApplications");
-      })
-      .catch(err => {
-        console.log("err");
+        var actions = res.doc.properties.actions;
+        actions.push({
+          name: "Shape was Edited ",
+          date: Date(Date.now())
+            .toString()
+            .slice(4, 21),
+          responsibleUser: this.authService.getProfile()
+        });
+        const g = {
+          "properties.actions": actions,
+          "properties.surface": this.state.surface,
+
+          geometry: {
+            type: "Polygon",
+            coordinates: [this.state.geometry]
+          }
+        };
+        this.licenseRequestsService
+          .updateApplication(this.state.currentLicenseId, g)
+          .then(res2 => {
+            console.log("succeess");
+            this.props.history.replace("/admin/permitApplications");
+          })
+          .catch(err2 => {
+            console.log("err");
+          });
       });
   };
 }

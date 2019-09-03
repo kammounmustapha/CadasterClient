@@ -23,7 +23,7 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { Launcher } from "react-chat-window";
 import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
-
+import Table from "components/Table/Table";
 class LicenseRequestsEdit extends Component {
   constructor(props) {
     super(props);
@@ -51,7 +51,9 @@ class LicenseRequestsEdit extends Component {
       expiryDate: "07-08-2019",
       rejectMessage: "",
       messageList: [],
-      buttonsDisabled: false
+      buttonsDisabled: false,
+      actions: [],
+      actionsList: []
     };
     this.applicationService = new LicenseRequestsService();
     this.companyService = new CompanyService();
@@ -87,8 +89,13 @@ class LicenseRequestsEdit extends Component {
             comments: properties.comments,
             surface: properties.surface,
             username: properties.user.fullName,
-            appDate: this.getDate(createdAt)
+            appDate: this.getDate(createdAt),
+            actionsList: properties.actions
           });
+          var actions = properties.actions.map((el, i = 1) => {
+            return [i + 1, el.name, el.date, el.responsibleUser.fullName];
+          });
+          this.setState({ actions: actions });
           if (properties.messages) {
             this.setState({ messageList: properties.messages });
           }
@@ -172,6 +179,9 @@ class LicenseRequestsEdit extends Component {
               <Tab>
                 <Button color="primary">Draw the Area</Button>
               </Tab>
+              <Tab>
+                <Button color="primary">Actions</Button>
+              </Tab>
             </center>
           </div>
           <Panel>
@@ -212,6 +222,7 @@ class LicenseRequestsEdit extends Component {
                           />
                           {this.state.MS}
                           <IntegrationReactSelect
+                            isDisabled={true}
                             id="type"
                             value={this.state.type}
                             data={getLicenseTypes()}
@@ -254,6 +265,7 @@ class LicenseRequestsEdit extends Component {
                         </GridItem>
                         <GridItem xs={12} sm={12} md={12}>
                           <IntegrationReactSelect
+                            isDisabled={true}
                             id="jurisdiction"
                             value={this.state.jurisdiction}
                             data={getCountries()}
@@ -356,6 +368,29 @@ class LicenseRequestsEdit extends Component {
                         type="edit"
                       ></LeafletDraw>
                     </GridContainer>
+                  </CardBody>
+                </Card>
+              </GridItem>
+            </GridContainer>
+          </Panel>
+          <Panel>
+            <GridContainer>
+              <GridItem xs={18} sm={12} md={12}>
+                <Card>
+                  <CardHeader color="primary">
+                    <h4 className={classes.cardTitleWhite}>Actions</h4>
+                  </CardHeader>
+                  <CardBody>
+                    <Table
+                      tableHeaderColor="primary"
+                      tableHead={[
+                        "Number",
+                        "Action",
+                        "Completed Date",
+                        "Responsible User"
+                      ]}
+                      tableData={this.state.actions}
+                    ></Table>
                   </CardBody>
                 </Card>
               </GridItem>
@@ -486,10 +521,19 @@ class LicenseRequestsEdit extends Component {
     this.setState({ [e.target.id]: e.target.value });
   };
   handleSubmitAccept = e => {
+    var actions = this.state.actionsList;
+    actions.push({
+      name: "Granting",
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
+    });
     this.applicationService
       .updateApplication(this.state.currentLicenceApplication._id, {
         "properties.approved": "+1",
-        "properties.status": "َActive"
+        "properties.status": "َActive",
+        "properties.actions": actions
       })
       .then(res1 => {
         alert("success");
@@ -501,6 +545,7 @@ class LicenseRequestsEdit extends Component {
     delete newLicense._id;
     delete newLicense.properties.approved;
     newLicense.properties.appliedAt = newLicense.createdAt;
+    newLicense.properties.actions = actions;
     delete newLicense.createdAt;
     delete newLicense.updatedAt;
     newLicense.properties.grantDate = this.state.grantDate;
@@ -508,22 +553,33 @@ class LicenseRequestsEdit extends Component {
     newLicense.properties.status = "Active";
     this.licenseService.addLicense(newLicense).then(res => {
       console.log(res.doc);
+      this.props.history.push("/admin/Licenses");
     });
 
     this.handleClose();
   };
   handleSubmitReject = e => {
-    this.applicationService
-      .updateApplication(this.state.currentLicenceApplication._id, {
-        "properties.approved": "-1",
-        "properties.status": "Rejected"
-      })
-      .then(res => {
-        alert("success");
-      })
-      .catch(err => {
-        alert("err");
-      });
+    var action = {
+      name: "Rejecting",
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
+    };
+    this.setState({ actionsList: [...this.state.actionsList, action] }, () => {
+      this.applicationService
+        .updateApplication(this.state.currentLicenceApplication._id, {
+          "properties.approved": "-1",
+          "properties.status": "Rejected",
+          "properties.actions": this.state.actionsList
+        })
+        .then(res => {
+          this.props.history.push("/admin/lincenseApplications");
+        })
+        .catch(err => {
+          alert("err");
+        });
+    });
   };
   _onMessageWasSent(message) {
     message.data.text +=
@@ -537,15 +593,23 @@ class LicenseRequestsEdit extends Component {
       " )";
     message.author = "them";
     message.owner = this.authService.getProfile();
-    console.log(message);
+    var action = {
+      name: "Message sent: " + message.data.text,
+      date: Date(Date.now())
+        .toString()
+        .slice(4, 21),
+      responsibleUser: this.authService.getProfile()
+    };
     this.setState(
       {
-        messageList: [...this.state.messageList, message]
+        messageList: [...this.state.messageList, message],
+        actionsList: [...this.state.actionsList, action]
       },
       () => {
         this.applicationService
           .updateApplication(this.state.currentLicenceApplication._id, {
-            "properties.messages": this.state.messageList
+            "properties.messages": this.state.messageList,
+            "properties.actions": this.state.actionsList
           })
           .then(res => {});
       }

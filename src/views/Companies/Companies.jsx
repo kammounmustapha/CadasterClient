@@ -190,10 +190,10 @@ class Companies extends React.Component {
             <Card>
               <CardHeader color="primary">
                 <GridItem xs={12} sm={12} md={6}>
-                  <h4 className={classes.cardTitleWhite}>Companies List</h4>
+                  <h4 className={classes.cardTitleWhite}>Parties List</h4>
                 </GridItem>
                 <p className={classes.cardCategoryWhite}>
-                  The list of cadaster companies
+                  The list of cadaster Parties
                 </p>
               </CardHeader>
               <CardBody>
