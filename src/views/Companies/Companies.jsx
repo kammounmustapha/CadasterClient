@@ -14,6 +14,7 @@ import TextField from "@material-ui/core/TextField";
 import Fab from "@material-ui/core/Fab";
 import Icon from "@material-ui/core/Icon";
 import Modal from "react-awesome-modal";
+import MaterialTable from "material-table";
 const useStyles = makeStyles(theme => ({
   container: {
     display: "flex",
@@ -82,9 +83,22 @@ class Companies extends React.Component {
 
   componentDidMount() {
     this.companyService.getAll().then(res => {
+      var list = res.companies.map((element, i = 0) => {
+        element.action = (
+          <Fab
+            color="secondary"
+            aria-label="edit"
+            onClick={this.handleEdit.bind(this, element)}
+          >
+            <Icon>edit_icon</Icon>
+          </Fab>
+        );
+        element.counter = i;
+        i++;
+      });
       this.setState({
-        companylist: res.companies,
-        companylistFinal: res.companies
+        companylist: list,
+        list: res.companies
       });
       console.log(res.companies);
     });
@@ -115,29 +129,6 @@ class Companies extends React.Component {
       });
   };
 
-  filterCompanies = e => {
-    var updatedList = this.state.companylist;
-    updatedList = updatedList.filter(item => {
-      return (
-        item.fullName
-          .toString()
-          .toLowerCase()
-          .search(e.target.value.toString().toLowerCase()) !== -1
-      );
-    });
-    this.setState({
-      companylistFinal: updatedList
-    });
-    if (updatedList == 0) {
-      this.setState({
-        message: true
-      });
-    } else {
-      this.setState({
-        message: false
-      });
-    }
-  };
   handleEdit = company => {
     console.log(company.areaServed);
     this.setState({
@@ -182,55 +173,36 @@ class Companies extends React.Component {
   };
   render() {
     const { classes } = this.props;
-
+    const columns = [
+      { title: "Name", field: "fullName" },
+      { title: "Type", field: "type" },
+      { title: "Headquarters", field: "headquarters" },
+      { title: "Industry", field: "industry" },
+      { title: "Website", field: "website" },
+      { title: "Action", field: "action" }
+    ];
     return (
       <div>
         <GridContainer>
           <GridItem xs={12} sm={12} md={12}>
             <Card>
-              <CardHeader color="primary">
-                <GridItem xs={12} sm={12} md={6}>
-                  <h4 className={classes.cardTitleWhite}>Parties List</h4>
-                </GridItem>
-                <p className={classes.cardCategoryWhite}>
-                  The list of cadaster Parties
-                </p>
-              </CardHeader>
               <CardBody>
-                <TextField
-                  id="search"
-                  label="Search"
-                  type="search"
-                  className={classes.textField}
-                  margin="normal"
-                  onChange={this.filterCompanies}
-                />
-                {this.state.message ? <li>No search results.</li> : ""}
-                <Table
-                  tableHeaderColor="primary"
-                  tableHead={[
-                    "Name",
-                    "Country",
-                    "Type",
-                    "Industry",
-                    "Web Site",
-                    "registration Number"
-                  ]}
-                  tableData={this.state.companylistFinal.map(company => [
-                    <b>{company.fullName}</b>,
-                    <b>{company.headquarters}</b>,
-                    <b>{company.type}</b>,
-                    <b>{company.industry}</b>,
-                    <b>{company.website}</b>,
-                    <b>{company.registrationNumber}</b>,
-                    <Fab
-                      color="secondary"
-                      aria-label="edit"
-                      onClick={this.handleEdit.bind(this, company)}
-                    >
-                      <Icon>edit_icon</Icon>
-                    </Fab>
-                  ])}
+                <MaterialTable
+                  options={{
+                    rowStyle: x => {
+                      if (x.counter % 2) {
+                        return { backgroundColor: "#f2f2f2" };
+                      }
+                    },
+                    headerStyle: {
+                      backgroundColor: "purple",
+                      color: "white"
+                    }
+                  }}
+                  title="List of Parties"
+                  columns={columns}
+                  data={this.state.list}
+                  onRowClick={this.handleRowClick}
                 />
               </CardBody>
             </Card>

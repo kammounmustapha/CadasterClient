@@ -13,6 +13,7 @@ import Icon from "@material-ui/core/Icon";
 import TextField from "@material-ui/core/TextField";
 import LicenseRequestsService from "../../services/LicenseRequestsService";
 import AuthService from "../../layouts/AuthService";
+import MaterialTable from "material-table";
 const styles = {
   cardCategoryWhite: {
     color: "rgba(255,255,255,.62)",
@@ -45,29 +46,7 @@ class PermitApplications extends Component {
     this.licenseRequestsService = new LicenseRequestsService();
     this.authService = new AuthService();
   }
-  filterApplications = e => {
-    var updatedList = this.state.applicationsList;
-    updatedList = updatedList.filter(item => {
-      return (
-        item.properties.name
-          .toString()
-          .toLowerCase()
-          .search(e.target.value.toString().toLowerCase()) !== -1
-      );
-    });
-    this.setState({
-      applicationsListFinal: updatedList
-    });
-    if (updatedList == 0) {
-      this.setState({
-        message: true
-      });
-    } else {
-      this.setState({
-        message: false
-      });
-    }
-  };
+
   componentDidMount = () => {
     this.licenseRequestsService.getAll().then(res => {
       var array = [];
@@ -78,9 +57,22 @@ class PermitApplications extends Component {
           array.push(element);
         }
       });
+      var list = array.map((element, i = 0) => {
+        element.action = (
+          <Fab
+            color="secondary"
+            aria-label="edit"
+            onClick={this.handleEdit.bind(this, element)}
+          >
+            <Icon>edit_icon</Icon>
+          </Fab>
+        );
+        element.counter = i;
+        i++;
+      });
       this.setState({
-        applicationsList: array,
-        applicationsListFinal: array
+        applicationsList: list,
+        list: array
       });
       console.log(res);
     });
@@ -101,72 +93,77 @@ class PermitApplications extends Component {
   };
   render() {
     const { classes } = this.props;
-
+    var x = (
+      <Table
+        tableHeaderColor="primary"
+        tableHead={[
+          "Name",
+          "Parties",
+          "Type",
+          "Pegged date",
+          "Region",
+          "Project",
+          "Status",
+          "responsible Office"
+        ]}
+        tableData={this.state.applicationsListFinal.map(application => {
+          const { properties } = application;
+          return [
+            <b>{properties.name}</b>,
+            //     <b>{properties.parties}</b>,
+            <b>{this.getText(properties.parties)}</b>,
+            <b>{properties.type.label + "(" + properties.type.value + ")"}</b>,
+            <b>{properties.peggedDate}</b>,
+            <b>{properties.region}</b>,
+            <b>{properties.project}</b>,
+            <b>{properties.status}</b>,
+            <b>{properties.responsibleOffice}</b>,
+            <Fab
+              color="secondary"
+              aria-label="edit"
+              onClick={this.handleEdit.bind(this, application)}
+            >
+              <Icon>edit_icon</Icon>
+            </Fab>
+          ];
+        })}
+      />
+    );
+    const columns = [
+      { title: "Name", field: "properties.name" },
+      { title: "Type", field: "properties.type.value" },
+      { title: "Place", field: "properties.jurisdiction" },
+      { title: "Pegged Date", field: "properties.peggedDate" },
+      { title: "Status", field: "properties.status" },
+      { title: "Area", field: "properties.surface" },
+      { title: "Action", field: "action" }
+    ];
     return (
       <div>
         <GridContainer>
           <GridItem xs={12} sm={12} md={12}>
             <Card>
-              <CardHeader color="primary">
-                <GridItem xs={12} sm={12} md={6}>
-                  <h4 style={styles.cardTitleWhite}>
-                    License Applications List
-                  </h4>
-                </GridItem>
-                <p style={styles.cardCategoryWhite}>
-                  The list of Permit Applications
-                </p>
-              </CardHeader>
               <CardBody>
-                <TextField
-                  id="search"
-                  label="Search"
-                  type="search"
-                  className={classes.textField}
-                  margin="normal"
-                  onChange={this.filterApplications}
-                />
-                {this.state.message ? <li>No search results.</li> : ""}
-                <Table
-                  tableHeaderColor="primary"
-                  tableHead={[
-                    "Name",
-                    "Parties",
-                    "Type",
-                    "Pegged date",
-                    "Region",
-                    "Project",
-                    "Status",
-                    "responsible Office"
-                  ]}
-                  tableData={this.state.applicationsListFinal.map(
-                    application => {
-                      const { properties } = application;
-                      return [
-                        <b>{properties.name}</b>,
-                        //     <b>{properties.parties}</b>,
-                        <b>{this.getText(properties.parties)}</b>,
-                        <b>
-                          {properties.type.label +
-                            "(" +
-                            properties.type.value +
-                            ")"}
-                        </b>,
-                        <b>{properties.peggedDate}</b>,
-                        <b>{properties.region}</b>,
-                        <b>{properties.project}</b>,
-                        <b>{properties.status}</b>,
-                        <b>{properties.responsibleOffice}</b>,
-                        <Fab
-                          color="secondary"
-                          aria-label="edit"
-                          onClick={this.handleEdit.bind(this, application)}
-                        >
-                          <Icon>edit_icon</Icon>
-                        </Fab>
-                      ];
+                <MaterialTable
+                  options={{
+                    rowStyle: x => {
+                      if (x.properties.approved === "-1") {
+                        return { backgroundColor: "#ff9999" };
+                      } else if (x.properties.approved === "+1") {
+                        return { backgroundColor: "#b3ffd6" };
+                      } else {
+                        return { backgroundColor: "white" };
+                      }
+                    },
+                    headerStyle: {
+                      backgroundColor: "purple",
+                      color: "white"
                     }
-                  )}
+                  }}
+                  title="List of licenses"
+                  columns={columns}
+                  data={this.state.list}
+                  onRowClick={this.handleRowClick}
                 />
               </CardBody>
             </Card>

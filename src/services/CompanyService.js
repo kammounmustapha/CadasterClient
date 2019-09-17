@@ -55,12 +55,14 @@ export default class CompanyService {
       headers["Authorization"] = this.authService.getToken();
     }
 
-    return fetch(url, {
-      headers,
-      ...options
-    })
-      .then(this._checkStatus)
-      .then(response => response.json());
+    return (
+      fetch(url, {
+        headers,
+        ...options
+      })
+        // .then(this._checkStatus)
+        .then(response => response.json())
+    );
   }
 
   _checkStatus(response) {

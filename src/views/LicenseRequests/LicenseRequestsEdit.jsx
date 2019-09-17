@@ -24,6 +24,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { Launcher } from "react-chat-window";
 import SnackbarContent from "components/Snackbar/SnackbarContent.jsx";
 import Table from "components/Table/Table";
+import MaterialTable from "material-table";
 class LicenseRequestsEdit extends Component {
   constructor(props) {
     super(props);
@@ -92,8 +93,15 @@ class LicenseRequestsEdit extends Component {
             appDate: this.getDate(createdAt),
             actionsList: properties.actions
           });
-          var actions = properties.actions.map((el, i = 1) => {
-            return [i + 1, el.name, el.date, el.responsibleUser.fullName];
+
+          var actions = [];
+          properties.actions.map((el, i = 1) => {
+            actions.push({
+              number: i + 1,
+              "el.name": el.name,
+              "el.date": el.date,
+              "el.responsibleUser.fullName": el.responsibleUser.fullName
+            });
           });
           this.setState({ actions: actions });
           if (properties.messages) {
@@ -168,6 +176,12 @@ class LicenseRequestsEdit extends Component {
   }
   render() {
     const { classes } = this.props;
+    const colmuns = [
+      { title: "Number", field: "number" },
+      { title: "Action", field: "el.name" },
+      { title: "Date", field: "el.date" },
+      { title: "Responsible User", field: "el.responsibleUser.fullName" }
+    ];
     return (
       <div>
         <Tabs>
@@ -381,16 +395,23 @@ class LicenseRequestsEdit extends Component {
                     <h4 className={classes.cardTitleWhite}>Actions</h4>
                   </CardHeader>
                   <CardBody>
-                    <Table
-                      tableHeaderColor="primary"
-                      tableHead={[
-                        "Number",
-                        "Action",
-                        "Completed Date",
-                        "Responsible User"
-                      ]}
-                      tableData={this.state.actions}
-                    ></Table>
+                    <MaterialTable
+                      options={{
+                        rowStyle: x => {
+                          if (x.counter % 2) {
+                            return { backgroundColor: "#f2f2f2" };
+                          }
+                        },
+                        headerStyle: {
+                          backgroundColor: "purple",
+                          color: "white"
+                        }
+                      }}
+                      title="List of Actions"
+                      columns={colmuns}
+                      data={this.state.actions}
+                      onRowClick={this.handleRowClick}
+                    />
                   </CardBody>
                 </Card>
               </GridItem>
