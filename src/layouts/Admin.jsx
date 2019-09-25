@@ -61,67 +61,71 @@ const switchRoutes = (
 );
 
 class Dashboard extends React.Component {
-  authService = new AuthService();
-  state = {
-    image: image,
-    color: "blue",
-    hasImage: true,
-    fixedClasses: "dropdown show",
-    mobileOpen: false,
-    current_user: this.authService.getProfile(),
-    routes: routes,
-    switchRoutes: switchRoutes
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      image: image,
+      color: "blue",
+      hasImage: true,
+      fixedClasses: "dropdown show",
+      mobileOpen: false,
+      routes: routes,
+      switchRoutes: switchRoutes
+    };
+    this.authService = new AuthService();
+  }
+
   componentWillMount() {
     if (!this.authService.loggedIn()) {
       this.props.history.push("/login");
-    }
-    if (this.authService.getProfile().role !== "4") {
-      var r = [];
+    } else {
+      if (this.authService.getProfile().role !== "4") {
+        var r = [];
 
-      if (this.authService.getProfile().role === "1") {
-        routes.map(element => {
-          if (
-            element.name !== "Users" &&
-            element.path !== "/Parties" &&
-            element.path !== "/lincenseApplications" &&
-            element.path !== "/lincenseApplicationsNew" &&
-            element.path !== "/lincenseApplicationsEdit"
-          ) {
-            r.push(element);
-          }
-        });
-      } else {
-        routes.map(element => {
-          if (
-            element.name !== "Users" &&
-            element.path !== "/permitApplications" &&
-            element.path !== "/permitApplicationsNew" &&
-            element.path !== "/permitApplicationsEdit"
-          ) {
-            r.push(element);
-          }
-        });
-      }
-      this.setState({ routes: r });
-      var sr = (
-        <Switch>
-          {r.map((prop, key) => {
-            if (prop.layout === "/admin") {
-              return (
-                <Route
-                  path={prop.layout + prop.path}
-                  component={prop.component}
-                  key={key}
-                />
-              );
+        if (this.authService.getProfile().role === "1") {
+          routes.map(element => {
+            if (
+              element.name !== "Users" &&
+              element.path !== "/Parties" &&
+              element.path !== "/lincenseApplications" &&
+              element.path !== "/lincenseApplicationsNew" &&
+              element.path !== "/lincenseApplicationsEdit"
+            ) {
+              r.push(element);
             }
-            return null;
-          })}
-          <Redirect from="/admin" to="/admin/dashboard" />
-        </Switch>
-      );
-      this.setState({ switchRoutes: sr });
+          });
+        } else {
+          routes.map(element => {
+            if (
+              element.name !== "Users" &&
+              element.path !== "/permitApplications" &&
+              element.path !== "/permitApplicationsNew" &&
+              element.path !== "/permitApplicationsEdit"
+            ) {
+              r.push(element);
+            }
+          });
+        }
+        this.setState({ routes: r });
+        var sr = (
+          <Switch>
+            {r.map((prop, key) => {
+              if (prop.layout === "/admin") {
+                return (
+                  <Route
+                    path={prop.layout + prop.path}
+                    component={prop.component}
+                    key={key}
+                  />
+                );
+              }
+              return null;
+            })}
+            <Redirect from="/admin" to="/admin/dashboard" />
+          </Switch>
+        );
+        this.setState({ switchRoutes: sr });
+      }
     }
   }
 
@@ -176,7 +180,7 @@ class Dashboard extends React.Component {
       <div className={classes.wrapper}>
         <Sidebar
           routes={this.state.routes}
-          logoText={"Cadaster"}
+          logoText={"Cadastre"}
           logo={logo}
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
@@ -188,7 +192,6 @@ class Dashboard extends React.Component {
           <Navbar
             routes={this.state.routes}
             handleDrawerToggle={this.handleDrawerToggle}
-            current_user={this.state.current_user}
             {...rest}
           />
           {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}

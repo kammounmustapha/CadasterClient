@@ -130,7 +130,7 @@ class LeafletDraw extends Component {
     } else return 8;
   }
   getCenter() {
-    if (this.props.type === "edit") {
+    if (this.props.type === "edit" && this.props.currentApplication != null) {
       return [
         this.props.currentApplication.geometry.coordinates[0][0][1],
         this.props.currentApplication.geometry.coordinates[0][0][0]

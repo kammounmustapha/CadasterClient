@@ -58,8 +58,7 @@ class PermitApplicationsEdit extends Component {
           const { properties } = this.state.currentLicenceApplication;
           this.setState({
             company: properties.company.fullName,
-            type:
-              properties.type.label /*+ " (" + properties.type.value + ")" */,
+            type: properties.type,
             name: properties.name,
             parties: properties.parties,
             peggedDate: properties.peggedDate,
@@ -201,7 +200,7 @@ class PermitApplicationsEdit extends Component {
   }
   getText() {
     var array = [];
-    array = this.state.parties.map(suggestion => ({
+    array = this.state.companiesList.map(suggestion => ({
       value: suggestion.fullName,
       label: suggestion.fullName,
       object: suggestion
@@ -256,7 +255,7 @@ class PermitApplicationsEdit extends Component {
                           <IntegrationReactSelect
                             isDisabled={this.state.notAllowToChange}
                             id="type"
-                            value={this.state.type}
+                            value={this.state.type.label}
                             data={getLicenseTypes()}
                             message="Choose the type"
                             label="Type"

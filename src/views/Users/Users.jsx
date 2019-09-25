@@ -19,11 +19,12 @@ import CardFooter from "components/Card/CardFooter.jsx";
 import Select from "react-select";
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 import AuthService from "../../layouts/AuthService";
+import { width } from "@material-ui/system";
 
 const options = [
-  { value: "1", label: "Permit Application" },
-  { value: "2", label: "Cadaster Manager" },
-  { value: "3", label: "Admin" }
+  { value: "1", label: "Permit Applicant" },
+  { value: "2", label: "Cadastral Manager" },
+  { value: "3", label: "Administrative" }
 ];
 class Users extends React.Component {
   constructor(props) {
@@ -103,7 +104,7 @@ class Users extends React.Component {
                   tableData={this.state.users.map((element, i = 0) => [
                     i + 1,
                     element.fullName,
-                    this.getName(element.role),
+                    <b>{this.getName(element.role)}</b>,
                     element.email
                   ])}
                 />
@@ -141,7 +142,7 @@ class Users extends React.Component {
                           style={{
                             paddingRight: "40px",
                             marginLeft: "80px",
-                            width: "170px"
+                            width: "270px"
                           }}
                         />
                       </GridItem>
@@ -166,17 +167,15 @@ class Users extends React.Component {
                         />
                       </GridItem>
                       <GridItem
-                        xs={12}
-                        sm={12}
-                        md={5}
                         style={{
-                          marginTop: "30px"
+                          width: "400px"
                         }}
                       >
                         <Select
                           value={role}
                           onChange={this.handleChange2}
                           options={options}
+                          placeholder="Role"
                         />
                       </GridItem>
                     </GridContainer>
@@ -184,7 +183,7 @@ class Users extends React.Component {
                   </CardBody>
                   <CardFooter>
                     <Button color="warning" type="submit">
-                      Create Profile
+                      Add User
                     </Button>
                   </CardFooter>
                 </form>

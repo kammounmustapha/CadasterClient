@@ -67,7 +67,7 @@ export default class AuthService {
   loggedIn() {
     // Checks if there is a saved token and it's still valid
     const token = this.getToken(); // GEtting token from localstorage
-    return !!token && !this.isTokenExpired(token); // handwaiving here
+    return token && !this.isTokenExpired(token); // handwaiving here
   }
 
   isTokenExpired(token) {
@@ -116,12 +116,14 @@ export default class AuthService {
       headers["Authorization"] = this.getToken();
     }
 
-    return fetch(url, {
-      headers,
-      ...options
-    })
-      .then(this._checkStatus)
-      .then(response => response.json());
+    return (
+      fetch(url, {
+        headers,
+        ...options
+      })
+        // .then(this._checkStatus)
+        .then(response => response.json())
+    );
   }
 
   _checkStatus(response) {

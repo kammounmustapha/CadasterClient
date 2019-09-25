@@ -23,7 +23,7 @@ class PermitApplicationNew extends Component {
     this.state = {
       name: "",
       type: "",
-      parties: "",
+      parties: [],
       peggedDate: "07-08-2019",
       commodityGroups: [],
       jurisdiction: "",
@@ -40,12 +40,23 @@ class PermitApplicationNew extends Component {
       surface: "",
       message: "",
       notAllowedToDraw: true,
-      notAllowedToAccessDraw: true
+      notAllowedToAccessDraw: true,
+      isComplete: false
     };
     this.data = getLicenseTypes();
     this.companyService = new CompanyService();
     this.licenseRequestsService = new LicenseRequestsService();
     this.authService = new AuthService();
+  }
+  isComplete() {
+    return (
+      this.state.parties.length > 0 &&
+      this.state.type != "" &&
+      this.state.commodityGroups.length > 0 &&
+      this.state.jurisdiction.length > 2 &&
+      this.state.region.length > 2 &&
+      this.state.district.length > 2
+    );
   }
   componentDidMount() {
     this.companyService.getAll().then(res => {
@@ -54,19 +65,23 @@ class PermitApplicationNew extends Component {
   }
   handleChange = e => {
     this.setState({ [e.target.id]: e.target.value });
+    this.isComplete();
   };
   inputChangedHandler = value => {
     this.setState({ type: value });
+    this.isComplete();
   };
   inputChangedHandler2 = value => {
-    this.setState({ company: value });
+    this.setState({ company: value, parties: value });
+    this.isComplete();
   };
   inputChangedHandler3 = value => {
     this.setState({ jurisdiction: value.label });
-    console.log(value.label);
+    this.isComplete();
   };
   inputChangedHandler4 = value => {
     this.setState({ commodityGroups: value });
+    this.isComplete();
   };
 
   handleSubmit = event => {
@@ -271,6 +286,7 @@ class PermitApplicationNew extends Component {
                             round
                             type="submit"
                             style={{ marginLeft: "30px" }}
+                            disabled={!this.isComplete()}
                           >
                             Save
                           </Button>

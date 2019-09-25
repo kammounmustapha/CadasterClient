@@ -61,6 +61,12 @@ class LicenseRequestsEdit extends Component {
     this.authService = new AuthService();
     this.licenseService = new LicenseService();
   }
+  isComplete() {
+    return (
+      this.state.grantDate != "07-08-2019" &&
+      this.state.expiryDate != "07-08-2019"
+    );
+  }
   componentWillMount() {
     if (!localStorage.getItem("currentLicenceApplication")) {
       this.props.history.replace("/admin/lincenseApplications");
@@ -136,7 +142,7 @@ class LicenseRequestsEdit extends Component {
     this.companyService.getAll().then(res => {
       this.setState({ companiesList: res.companies }, () => {
         var array = [];
-        array = this.state.parties.map(suggestion => ({
+        array = this.state.companiesList.map(suggestion => ({
           value: suggestion.fullName,
           label: suggestion.fullName,
           object: suggestion
@@ -490,7 +496,11 @@ class LicenseRequestsEdit extends Component {
                     <Button onClick={this.handleClose} color="primary">
                       Cancel
                     </Button>
-                    <Button onClick={this.handleSubmitAccept} color="primary">
+                    <Button
+                      onClick={this.handleSubmitAccept}
+                      disabled={!this.isComplete()}
+                      color="primary"
+                    >
                       Accept
                     </Button>
                   </DialogActions>

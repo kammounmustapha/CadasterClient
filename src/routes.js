@@ -4,6 +4,7 @@ import gavel from "@material-ui/icons/Gavel";
 import work from "@material-ui/icons/Work";
 import UserIcon from "@material-ui/icons/People";
 import Company from "@material-ui/icons/Store";
+import Layers from "@material-ui/icons/Layers";
 // core components/views for Admin layout
 import DashboardPage from "views/Dashboard/Dashboard.jsx";
 import UserProfile from "views/UserProfile/UserProfile.jsx";
@@ -17,6 +18,7 @@ import PermitApplicationsNew from "views/PermitApplications/PermitApplicationsNe
 import PermitApplicationsEdit from "views/PermitApplications/PermitApplicationsEdit";
 import LicensesEdit from "views/Licenses/LicensesEdit";
 import Licenses from "views/Licenses/Licenses";
+import Map from "views/Maps/Map";
 // core components/views for RTL layout
 function getRoutes() {
   var dashboardRoutes = [];
@@ -35,6 +37,13 @@ function getRoutes() {
         icon: UserIcon,
         component: Users,
         layout: "/admin"
+      },
+      {
+        path: "/Map",
+        name: "Cadastre Map",
+        icon: Layers,
+        component: Map,
+        layout: "/admin "
       },
       {
         path: "/Parties",
